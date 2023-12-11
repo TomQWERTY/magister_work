@@ -37,3 +37,5 @@ F:\Univer\practic_1\done_in_coursework\CourseWork\obj\Debug\net6.0-windows\Cours
 F:\Univer\practic_1\done_in_coursework\CourseWork\obj\Debug\net6.0-windows\CourseWork.genruntimeconfig.cache
 F:\Univer\practic_1\done_in_coursework\CourseWork\obj\Debug\net6.0-windows\ref\CourseWork.dll
 F:\Univer\practic_1\done_in_coursework\CourseWork\obj\Debug\net6.0-windows\CourseWork.MethodChooseForm.resources
+F:\Univer\practic_1\done_in_coursework\CourseWork\bin\Debug\net6.0-windows\Newtonsoft.Json.dll
+F:\Univer\practic_1\done_in_coursework\CourseWork\obj\Debug\net6.0-windows\CourseWork.csproj.CopyComplete

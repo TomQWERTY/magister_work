@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 using System.IO;
+using Newtonsoft.Json;
 
 namespace CourseWork
 {
@@ -371,74 +372,43 @@ namespace CourseWork
         {
             if (saveFileDialog1.ShowDialog() == DialogResult.OK)
             {
-                string[] output = new string[4 + connections.Count];
-                output[0] = "";
-                for (int i = 0; i < places.Count; i++)
-                {
-                    output[0] += places[i].Value.X + ";" + places[i].Value.Y + " ";
-                }
-                output[1] = "";
-                for (int i = 0; i < transitions.Count; i++)
-                {
-                    output[1] += transitions[i].Value.X + ";" + transitions[i].Value.Y + " ";
-                }
-                output[2] = "";
-                for (int i = 0; i < horizontal.Count; i++)
-                {
-                    output[2] += horizontal[i] + " ";
-                }
-                output[3] = connections.Count + "";
-                for (int i = 0; i < connections.Count; i++)
-                {
-                    output[i + 4] = connections[i];
-                }
-                controller.SaveData(saveFileDialog1.FileName, output);
-            }
+                ViewSaveData viewSaveData = new ViewSaveData();
+                viewSaveData.places = places;
+                viewSaveData.transitions = transitions;
+                viewSaveData.horizontal = horizontal;
+                viewSaveData.connections = connections;
+                controller.SaveData(saveFileDialog1.FileName, viewSaveData);
+            }           
         }
 
         private void button4_Click(object sender, EventArgs e)
         {
             if (openFileDialog1.ShowDialog() == DialogResult.OK)
             {
-                string[] input;
-                controller.LoadData(openFileDialog1.FileName, out input);
-                int inpInd = 0;
-                string[] inp = input[inpInd].Trim().Split(' ');
-                inpInd++;
-                for (int i = 0; i < inp.Length; i++)
+                ViewSaveData viewSaveData;
+                controller.LoadData(openFileDialog1.FileName, out viewSaveData);
+                horizontal = viewSaveData.horizontal;
+                connections = viewSaveData.connections;
+                for (int i = 0; i < viewSaveData.places.Count; i++)
                 {
-                    string[] point = inp[i].Split(';');
-                    AddPlaceElement(new Point(Convert.ToInt32(point[0]), Convert.ToInt32(point[1])));
+                    AddPlaceElement(new Point(viewSaveData.places[i].Value.X, viewSaveData.places[i].Value.Y));
                 }
-                inp = input[inpInd].Trim().Split(' ');
-                inpInd++;
-                string horizontalsLine = input[inpInd];
-                inpInd++;
-                if (horizontalsLine.Length > 0)
+                for (int i = 0, j = 0; i < viewSaveData.transitions.Count; i++)
                 {
-                    horizontal = new List<int>(Array.ConvertAll(horizontalsLine.Trim().Split(' '), Convert.ToInt32));
-                }
-                for (int i = 0, j = 0; i < inp.Length; i++)
-                {
-                    string[] point = inp[i].Split(';');
                     if (j < horizontal.Count && i == horizontal[j])
                     {
-                        AddTransitionElement(new Point(Convert.ToInt32(point[0]), Convert.ToInt32(point[1])), true);
+                        AddTransitionElement(new Point(viewSaveData.transitions[i].Value.X, viewSaveData.transitions[i].Value.Y), true);
                         j++;
                     }
                     else
                     {
-                        AddTransitionElement(new Point(Convert.ToInt32(point[0]), Convert.ToInt32(point[1])), false);
+                        AddTransitionElement(new Point(viewSaveData.transitions[i].Value.X, viewSaveData.transitions[i].Value.Y), false);
                     }
                 }
                 if (dgv1.ColumnCount > 1) dgv1.Columns.RemoveAt(dgv1.ColumnCount - 1);
-                int conCount = Convert.ToInt32(input[inpInd]);
-                inpInd++;
-                for (int i = 0; i < conCount; i++)
+                for (int i = 0; i < viewSaveData.connections.Count; i++)
                 {
-                    connections.Add(input[inpInd]);
-                    inpInd++;
-                    string[] connData = connections.Last().Split(' ');
+                    string[] connData = connections[i].Split(' ');
                     string[] p1Data = connData[0].Split(";");
                     string[] p2Data = connData[1].Split(";");
                     DrawConnection(new Point(Convert.ToInt32(p1Data[0]), Convert.ToInt32(p1Data[1])),

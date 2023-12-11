@@ -112,14 +112,14 @@ namespace CourseWork
             }
         }
 
-        public void SaveData(string fileName, string[] viewOutput)
+        public void SaveData(string fileName, ViewSaveData viewSaveData)
         {
-            model.Save(fileName, viewOutput);
+            model.Save(fileName, viewSaveData);
         }
 
-        public void LoadData(string fileName, out string[] array)
+        public void LoadData(string fileName, out ViewSaveData viewSaveData)
         {
-            model.Load(fileName, out array);
+            model.Load(fileName, out viewSaveData);
         }
 
         public void UpdateView()

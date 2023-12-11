@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using System.Windows.Forms;
+using Newtonsoft.Json;
 
 namespace CourseWork
 {
@@ -87,43 +88,21 @@ namespace CourseWork
             view.ModifyTokens(ind, num);
         }
 
-        public void Save(string fileName, string[] viewOutput)
+        public void Save(string fileName, ViewSaveData viewSaveData)
         {
-            string[] output = new string[viewOutput.Length + matrixW.Count + 1];
-            for (int i = 0; i <  viewOutput.Length; i++)
-            {
-                output[i] = viewOutput[i];
-            }
-            output[viewOutput.Length] = "";
-            for (int i = 0; i < marking.Count;i++)
-            {
-                output[viewOutput.Length] += marking[i] + " ";
-            }
-            for (int i = 0; i < marking.Count; i++)
-            {
-                for (int j = 0; j < matrixW[i].Count; j++)
-                {
-                    output[viewOutput.Length + 1 + i] += matrixW[i][j] + " ";
-                }
-            }
-            File.WriteAllLines(fileName, output);
+            SaveData save = new SaveData();
+            save.marking = marking;
+            save.matrix = matrixW;
+            save.viewSaveData = viewSaveData;
+            File.WriteAllText(fileName, JsonConvert.SerializeObject(save, Formatting.Indented));
         }
 
-        public void Load(string fileName, out string[] viewOut)
+        public void Load(string fileName, out ViewSaveData viewSaveData)
         {
-            string[] output = File.ReadAllLines(fileName);
-            int connCount = Convert.ToInt32(output[3]);
-            viewOut = new string[4 + connCount];
-            for (int i = 0; i < viewOut.Length; i++)
-            {
-                viewOut[i] = output[i];
-            }
-            marking = new List<int>(Array.ConvertAll(output[viewOut.Length].Trim().Split(' '), Convert.ToInt32));
-            matrixW = new List<List<int>>();
-            for (int i = viewOut.Length + 1; i < output.Length; i++)
-            {
-                matrixW.Add(new List<int>(Array.ConvertAll(output[i].Trim().Split(' '), Convert.ToInt32)));
-            }
+            SaveData saveData = JsonConvert.DeserializeObject<SaveData>(File.ReadAllText(fileName));
+            marking = saveData.marking;
+            matrixW = saveData.matrix;
+            viewSaveData = saveData.viewSaveData;
         }
 
         public void UpdateView()
