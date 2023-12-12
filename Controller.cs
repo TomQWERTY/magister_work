@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing.Drawing2D;
 using System.Drawing.Printing;
 using System.Linq;
+using System.Net.Security;
 using System.Runtime.InteropServices;
 using System.Security.AccessControl;
 using System.Text;
@@ -153,6 +154,7 @@ namespace CourseWork
                 else
                 {
                     tInvs = CheckInvariants(w, ref tInv);
+                    //tInvs = CheckInveriantsFar(w, ref tInv);
                 }
                 w = new int[model.matrixW[0].Count, model.matrixW.Count];
                 for (int i = 0; i < w.GetLength(0); i++)
@@ -188,7 +190,28 @@ namespace CourseWork
                 }
                 else
                 {
-                    pInvs = CheckInvariants(w, ref pInv);
+                    int[] indexes = new int[w.GetLength(0)];
+                    for (int i = 0; i < indexes.GetLength(0); i++) indexes[i] = i;
+                    List<int[]> permutations = new List<int[]>();
+                    GeneratePermutations(indexes, 0, indexes.Length - 1, permutations);
+                    for (int p = 0; p < permutations.Count; p++)
+                    {
+                        int[,] wn = new int[w.GetLength(0), w.GetLength(1)];
+                        for (int r = 0; r < indexes.Length; r++)
+                        {
+                            for (int c = 0; c < w.GetLength(1); c++)
+                            {
+                                wn[r, c] = w[permutations[p][r], c];
+                            }
+                        }
+                        pInvs = CheckInvariants(wn, ref pInv);
+                        if (pInvs.Length > 1)
+                        {
+                            break;
+                        }
+                    }
+                    //pInvs = CheckInvariants(w, ref pInv);
+                    //pInvs = CheckInveriantsFar(w, ref pInv);
                 }
                 bool[] infoForView = new bool[6];
                 if (tInv)
@@ -217,6 +240,97 @@ namespace CourseWork
                 }
                 view.ShowResults(infoForView, rank, tInvs, pInvs);
             }
+        }
+
+        private void GeneratePermutations(int[] array, int start, int end, List<int[]> permutations)
+        {
+            if (start == end)
+            {
+                int[] newAr = new int[array.Length];
+                Array.Copy(array, newAr, array.Length);
+                permutations.Add(newAr);
+                return;
+            }
+
+            for (int i = start; i <= end; i++)
+            {
+                int temp = array[start];
+                array[start] = array[i];
+                array[i] = temp;
+                GeneratePermutations(array, start + 1, end, permutations);
+                temp = array[start];
+                array[start] = array[i];
+                array[i] = temp;
+            }
+
+        }
+
+        private int[,] CheckInveriantsFar(int[,] wInv, ref bool ok)
+        {
+            //inverting a matrix
+            int[,] w = new int[wInv.GetLength(1), wInv.GetLength(0)];
+            for (int i = 0; i < w.GetLength(0); i++)
+            {
+                for (int j = 0; j < w.GetLength(1); j++)
+                {
+                    w[i, j] = wInv[j, i];
+                }
+            }
+            int rowCountInit = w.GetLength(0);
+            int colCount = w.GetLength(1) + w.GetLength(0);
+            List<int[]> c = new List<int[]>();
+            //creating augmented matrix
+            for (int rowI = 0; rowI < rowCountInit; rowI++)
+            {
+                c.Add(new int[colCount]);
+                c[rowI][rowI] = 1;//invariance
+                for (int colI = rowCountInit; colI < colCount; colI++)//incidence
+                {
+                    c[rowI][colI] = w[rowI, colI - rowCountInit];
+                }
+            }
+            for (int colI = rowCountInit; colI < colCount; colI++)//check incidence matrix columns
+            {
+                //count pos and neg elements indexes
+                List<int> posInds = new List<int>(), negInds = new List<int>();
+                for (int rowI = 0; rowI < c.Count; rowI++)
+                {
+                    if (c[rowI][colI] < 0) negInds.Add(rowI);
+                    else if (c[rowI][colI] > 0) posInds.Add(rowI);
+                }
+                //for each pair add its sum
+                for (int pI = 0; pI < posInds.Count; pI++)
+                {
+                    int j = posInds[pI];
+                    for (int nI = 0; nI < negInds.Count; nI++)
+                    {
+                        int i = negInds[nI];
+                        int gcd = GCD(Math.Abs(c[j][colI]), Math.Abs(c[i][colI]));
+                        int iMult = Math.Abs(c[j][colI]) / gcd;
+                        int jMult = Math.Abs(c[i][colI]) / gcd;
+                        int[] newRow = new int[colCount];
+                        for (int k = 0; k < colCount; k++)
+                        {
+                            newRow[k] = c[j][k] * jMult + c[i][k] * iMult;
+                        }
+                        c.Add(newRow);
+                    }
+                }
+                //remove originals
+                List<int> indsToRemove = posInds;
+                indsToRemove.AddRange(negInds);
+                indsToRemove.Sort();
+                for (int i = indsToRemove.Count - 1; i >= 0; i--) c.RemoveAt(indsToRemove[i]);
+            }
+            int[,] results = new int[c.Count, rowCountInit];
+            for (int i = 0; i < results.GetLength(0); i++)
+            {
+                for (int j = 0; j < results.GetLength(1); j++)
+                {
+                    results[i, j] = c[i][j];
+                }
+            }
+            return results;
         }
 
         private int[,] CheckInvariantsAlOpt(int[,] c, ref bool ok)
@@ -673,316 +787,243 @@ namespace CourseWork
 
         private int[,] CheckInvariants(int[,] w, ref bool ok)
         {
-            //avoiding losing variables
-            bool allGood = true;
-            do
+            /*Fraction[,] w = new Fraction[wInt.GetLength(0), wInt.GetLength(1)];
+            for (int i = 0; i <  wInt.GetLength(0); i++)
             {
-                allGood = true;
-                for (int j = 0; j < w.GetLength(1); j++)
-                {
-                    int sum = 0;
-                    int nonZero = 0;
-                    for (int i = 0; i < w.GetLength(0); i++)
-                    {
-                        sum += w[i, j];
-                        if (w[i, j] != 0) nonZero = i;
-                    }
-                    if (sum == 0)
-                    {
-                        //allGood = false;
-                        for (int k = 0; k < w.GetLength(1); k++)
-                        {
-                            //w[nonZero, k] *= 2;
-                        }
-                        break;
-                    }
-                }
-            }
-            while (!allGood);
-
+                for (int j = 0; j < wInt.GetLength(1); j++) w[i, j] = new Fraction(wInt[i, j], 1);
+            }*/
             int[] equation = new int[w.GetLength(1)];
             int varCount = w.GetLength(1);
             int equationCount = w.GetLength(0);
             int[,] parametredRes = new int[equation.Length, 1 + (varCount - equationCount > 1 ? varCount - equationCount : 1)];
             //bool square = w.GetLength(0) == w.GetLength(1);
-
-            if (true)
+            int[,,] reps = new int[equationCount, varCount, Math.Max(1, varCount - equationCount)];
+            for (int i = 0; i < varCount - 1 && i < equationCount; i++)
             {
-                int[,,] reps = new int[equationCount, varCount, Math.Max(1, varCount - equationCount)];
-                for (int i = 0; i < varCount - 1 && i < equationCount; i++)
+                reps[i, i, 0] = w[i, i];
+                //every other variable
+                for (int k = i + 1; k < varCount; k++)
                 {
-                    reps[i, i, 0] = w[i, i];
+                    reps[i, k, 0] = -w[i, k];
+                }
+                //every other equation
+                for (int j = i + 1; j < equationCount; j++)
+                {
                     //every other variable
                     for (int k = i + 1; k < varCount; k++)
                     {
-                        reps[i, k, 0] = -w[i, k];
+                        w[j, k] *= reps[i, i, 0];
+                        w[j, k] += reps[i, k, 0] * w[j, i];
                     }
-                    //every other equation
-                    for (int j = i + 1; j < equationCount; j++)
-                    {
-                        //every other variable
-                        for (int k = i + 1; k < varCount; k++)
-                        {
-                            w[j, k] *= reps[i, i, 0];
-                            w[j, k] += reps[i, k, 0] * w[j, i];
-                        }
-                        w[j, i] = 0;
-                    }
-                }
-                if (varCount - equationCount > 1)//using Diophantine equation algorithm
-                {
-                    int[] equation2 = new int[varCount - equationCount + 1];
-                    for (int i = 0; i < equation2.Length; i++)
-                    {
-                        //equation2[i] = reps[reps.GetLength(0) - 1, i + (reps.GetLength(1) - equation2.Length), 0];
-                        equation2[i] = w[reps.GetLength(0) - 1, i + (reps.GetLength(1) - equation2.Length)];
-                    }
-                    //equation2[0] *= -1;
-
-                    int[,] parametredRes2 = new int[equation2.Length, equation2.Length];
-                    int[] initialRes1 = new int[equation2.Length];
-                    int[] initialRes2 = new int[equation2.Length];
-                    int[] freeEl = new int[equation2.Length];
-                    for (int i = 0; i < equation2.Length - 1; i++)
-                    {
-                        int first = 1;
-                        if (i == equation2.Length - 2)
-                        {
-                            first = equation2[equation2.Length - 2 - i];
-                        }
-                        for (int j = 0; j <= i; j++)
-                        {
-                            if (j == 0)
-                            {
-                                int sol1 = 1, sol2 = 1;
-                                int gcd1 = GCDExtended(first, equation2[equation2.Length - 1 - i],
-                                    ref sol1, ref sol2);
-                                if (gcd1 < 0) gcd1 = -gcd1;
-                                else if (gcd1 == 0) gcd1 = 1;
-                                initialRes1[j] = sol1 * (freeEl[j] / gcd1);
-                                initialRes2[j] = sol2 * (freeEl[j] / gcd1);
-                            }
-                            else
-                            {
-                                initialRes2[j] = 1;
-                                int coeficient1 = equation2[equation2.Length - 2 - i];
-                                initialRes1[j] = coeficient1 != 0 ?
-                                    (freeEl[j] - initialRes2[j] * equation2[equation2.Length - 1 - i]) / coeficient1 : 0;
-                            }
-                            /*if (j == 0 && equation[equation.Length - 2 - i] > 1)
-                            {
-                                initialRes1[j] = 1;
-                                initialRes2[j] = freeEl[j] - initialRes1[j] * equation[equation.Length - 2 - i];
-                            }*/
-                            parametredRes2[equation2.Length - 1 - i, j] = initialRes2[j];
-                            freeEl[j] = initialRes1[j];
-                        }
-                        int gcd = GCD(first, equation2[equation2.Length - 1 - i]);
-                        if (gcd < 0) gcd = -gcd;
-                        else if (gcd == 0) gcd = 1;
-                        parametredRes2[equation2.Length - 1 - i, i + 1] = -first / gcd;//new parameter
-                        gcd = GCD(first, equation2[equation2.Length - 1 - i]);
-                        if (gcd < 0) gcd = -gcd;
-                        else if (gcd == 0) gcd = 1;
-                        freeEl[i + 1] = equation2[equation2.Length - 1 - i] / gcd;
-                    }
-                    for (int i = 0; i < freeEl.Length; i++)
-                    {
-                        parametredRes2[0, i] = freeEl[i];
-                    }
-                    int a = 0;
-                    for (int e = 0; e < equationCount - 1; e++)//write values of found variables
-                    {
-                        for (int p = 1; p < parametredRes2.GetLength(1); p++)//all parameters of last variable
-                        {
-                            reps[e, varCount - 1, p - 1] *= parametredRes2[parametredRes2.GetLength(0) - 1, p];
-                        }
-                        for (int v = 0; v < parametredRes2.GetLength(0) - 1; v++)//all variables found except last one
-                        {
-                            int vInReps = v + (varCount - equation2.Length);
-                            for (int p = 1; p < parametredRes2.GetLength(1); p++)//all parameters
-                            {
-                                reps[e, varCount - 1, p - 1] += parametredRes2[v, p] * reps[e, vInReps, 0];
-                            }
-                            reps[e, vInReps, 0] = 0;
-                            //reps[e, varCount - 1, 0] *= parametredRes2[v, 0 + 1];
-                        }
-                    }
-                    //write to final result
-                    for (int v = 0; v < parametredRes2.GetLength(0); v++)//all variables found
-                    {
-                        int vInReps = v + (varCount - equation2.Length);
-                        for (int p = 1; p < parametredRes2.GetLength(1); p++)//all parameters
-                        {
-                            parametredRes[vInReps, p] = parametredRes2[v, p];
-                        }
-                    }
-                    a = 0;
-                }
-                //backwards
-                if (varCount - equationCount > 1)
-                {
-                    for (int i = varCount - (varCount - equationCount + 2); i > 0; i--)
-                    {
-                        //every other replace equation
-                        for (int j = i - 1; j >= 0; j--)
-                        {
-                            //every other variable
-                            for (int k = varCount - 1; k >= 0; k--)
-                            {
-                                for (int p = 0; p < reps.GetLength(2); p++)
-                                {
-                                    if (k != i) reps[j, k, p] *= reps[i, i, 0];
-                                }
-                            }
-                            for (int p = 0; p < reps.GetLength(2); p++)
-                            {
-                                reps[j, varCount - 1, p] += reps[j, i, 0] * reps[i, varCount - 1, p];
-                            }
-                            reps[j, i, 0] = 0;
-                        }
-                    }
-                }
-                else
-                {
-                    for (int i = varCount - 2; i > 0; i--)
-                    {
-                        //every other replace equation
-                        for (int j = i - 1; j >= 0; j--)
-                        {
-                            //every other variable
-                            for (int k = varCount - 1; k >= 0; k--)
-                            {
-                                if (k != i) reps[j, k, 0] *= reps[i, i, 0];
-                            }
-                            reps[j, varCount - 1, 0] += reps[j, i, 0] * reps[i, varCount - 1, 0];
-                            reps[j, i, 0] = 0;
-                        }
-                    }
-                }
-                //reduce reps
-                List<int> repsL = new List<int>();
-                foreach (int el in reps) repsL.Add(el);
-                int gcdR = GCDArray(repsL.ToArray());
-                for (int i = 0; i < reps.GetLength(0); i++)
-                {
-                    for (int j = 0; j < reps.GetLength(1); j++)
-                    {
-                        for (int k = 0; k < reps.GetLength(2); k++)
-                        {
-                            if (gcdR != 0) reps[i, j, k] /= gcdR;
-                        }
-                    }
-                }
-
-
-
-                if (varCount - equationCount > 1)
-                {
-                    int multiplier = 1;
-                    for (int i = 0; i < varCount - (varCount - equationCount + 1); i++)
-                    {
-                        multiplier *= reps[i, i, 0];
-                    }
-                    for (int i = 0; i < equationCount; i++)//all
-                    {
-                        for (int p = 0; p < reps.GetLength(2); p++)
-                        {
-                            reps[i, varCount - 1, p] *= multiplier;
-                        }
-                    }
-                    for (int v = varCount - (varCount - equationCount + 1); v < parametredRes.GetLength(0); v++)
-                    {
-                        for (int p = 0; p < reps.GetLength(2); p++)
-                        {
-                            parametredRes[v, p + 1] *= multiplier;
-                        }
-                    }
-                    for (int i = 0; i < varCount - (varCount - equationCount + 1); i++)
-                    {
-                        if (reps[i, i, 0] != 0)
-                        {
-                            for (int p = 1; p < parametredRes.GetLength(1); p++)
-                            {
-                                parametredRes[i, p] = reps[i, varCount - 1, p - 1] / reps[i, i, 0];
-                            } 
-                        }
-                    }
-                }
-                else
-                {
-                    int multiplier = 1;
-                    for (int i = 0; i < varCount - 1; i++)
-                    {
-                        multiplier *= reps[i, i, 0];
-                    }
-                    for (int i = 0; i < varCount - 1; i++)
-                    {
-                        reps[i, varCount - 1, 0] *= multiplier;
-                    }
-                    for (int i = 0; i < varCount - 1; i++)
-                    {
-                        if (reps[i, i, 0] != 0) parametredRes[i, 1] = reps[i, varCount - 1, 0] / reps[i, i, 0];
-                    }
-                    parametredRes[varCount - 1, 1] = multiplier;
+                    w[j, i] = 0;
                 }
             }
-            else
+            if (varCount - equationCount > 1)//using Diophantine equation algorithm
             {
-                //int[] equation = new int[w.GetLength(1)];
-                for (int i = 0; i < equation.Length; i++)
+                int[] equation2 = new int[varCount - equationCount + 1];
+                for (int i = 0; i < equation2.Length; i++)
                 {
-                    equation[i] = 0;
-                    for (int j = 0; j < w.GetLength(0); j++)
-                    {
-                        equation[i] += w[j, i];
-                    }
+                    //equation2[i] = reps[reps.GetLength(0) - 1, i + (reps.GetLength(1) - equation2.Length), 0];
+                    equation2[i] = w[reps.GetLength(0) - 1, i + (reps.GetLength(1) - equation2.Length)];
                 }
+                //equation2[0] *= -1;
 
-                //int[,] parametredRes = new int[equation.Length, equation.Length];
-                int[] initialRes1 = new int[equation.Length];
-                int[] initialRes2 = new int[equation.Length];
-                int[] freeEl = new int[equation.Length];
-                for (int i = 0; i < equation.Length - 1; i++)
+                int[,] parametredRes2 = new int[equation2.Length, equation2.Length];
+                int[] initialRes1 = new int[equation2.Length];
+                int[] initialRes2 = new int[equation2.Length];
+                int[] freeEl = new int[equation2.Length];
+                for (int i = 0; i < equation2.Length - 1; i++)
                 {
                     int first = 1;
-                    if (i == equation.Length - 2)
+                    if (i == equation2.Length - 2)
                     {
-                        first = equation[equation.Length - 2 - i];
+                        first = equation2[equation2.Length - 2 - i];
                     }
                     for (int j = 0; j <= i; j++)
                     {
                         if (j == 0)
                         {
                             int sol1 = 1, sol2 = 1;
-                            int gcd = GCDExtended(first, equation[equation.Length - 1 - i],
+                            int gcd1 = GCDExtended(first, equation2[equation2.Length - 1 - i],
                                 ref sol1, ref sol2);
-                            initialRes1[j] = sol1 * (freeEl[j] / gcd);
-                            initialRes2[j] = sol2 * (freeEl[j] / gcd);
+                            if (gcd1 < 0) gcd1 = -gcd1;
+                            else if (gcd1 == 0) gcd1 = 1;
+                            initialRes1[j] = sol1 * (freeEl[j] / gcd1);
+                            initialRes2[j] = sol2 * (freeEl[j] / gcd1);
                         }
                         else
                         {
                             initialRes2[j] = 1;
-                            initialRes1[j] = freeEl[j] - initialRes2[j] * equation[equation.Length - 1 - i];
+                            int coeficient1 = equation2[equation2.Length - 2 - i];
+                            initialRes1[j] = coeficient1 != 0 ?
+                                (freeEl[j] - initialRes2[j] * equation2[equation2.Length - 1 - i]) / coeficient1 : 0;
                         }
                         /*if (j == 0 && equation[equation.Length - 2 - i] > 1)
                         {
                             initialRes1[j] = 1;
                             initialRes2[j] = freeEl[j] - initialRes1[j] * equation[equation.Length - 2 - i];
                         }*/
-                        parametredRes[equation.Length - 1 - i, j] = initialRes2[j];
+                        parametredRes2[equation2.Length - 1 - i, j] = initialRes2[j];
                         freeEl[j] = initialRes1[j];
                     }
-                    parametredRes[equation.Length - 1 - i, i + 1] = -first /
-                        GCD(first, equation[equation.Length - 1 - i]);//new parameter
-                    freeEl[i + 1] = equation[equation.Length - 1 - i] /
-                        GCD(first, equation[equation.Length - 1 - i]);
+                    int gcd = GCD(first, equation2[equation2.Length - 1 - i]);
+                    if (gcd < 0) gcd = -gcd;
+                    else if (gcd == 0) gcd = 1;
+                    parametredRes2[equation2.Length - 1 - i, i + 1] = -first / gcd;//new parameter
+                    gcd = GCD(first, equation2[equation2.Length - 1 - i]);
+                    if (gcd < 0) gcd = -gcd;
+                    else if (gcd == 0) gcd = 1;
+                    freeEl[i + 1] = equation2[equation2.Length - 1 - i] / gcd;
                 }
                 for (int i = 0; i < freeEl.Length; i++)
                 {
-                    parametredRes[0, i] = freeEl[i];
+                    parametredRes2[0, i] = freeEl[i];
+                }
+                int a = 0;
+                for (int e = 0; e < equationCount - 1; e++)//write values of found variables
+                {
+                    for (int p = 1; p < parametredRes2.GetLength(1); p++)//all parameters of last variable
+                    {
+                        reps[e, varCount - 1, p - 1] *= parametredRes2[parametredRes2.GetLength(0) - 1, p];
+                    }
+                    for (int v = 0; v < parametredRes2.GetLength(0) - 1; v++)//all variables found except last one
+                    {
+                        int vInReps = v + (varCount - equation2.Length);
+                        for (int p = 1; p < parametredRes2.GetLength(1); p++)//all parameters
+                        {
+                            reps[e, varCount - 1, p - 1] += parametredRes2[v, p] * reps[e, vInReps, 0];
+                        }
+                        reps[e, vInReps, 0] = 0;
+                        //reps[e, varCount - 1, 0] *= parametredRes2[v, 0 + 1];
+                    }
+                }
+                //write to final result
+                for (int v = 0; v < parametredRes2.GetLength(0); v++)//all variables found
+                {
+                    int vInReps = v + (varCount - equation2.Length);
+                    for (int p = 1; p < parametredRes2.GetLength(1); p++)//all parameters
+                    {
+                        parametredRes[vInReps, p] = parametredRes2[v, p];
+                    }
+                }
+                a = 0;
+            }
+            //backwards
+            if (varCount - equationCount > 1)
+            {
+                for (int i = varCount - (varCount - equationCount + 2); i > 0; i--)
+                {
+                    //every other replace equation
+                    for (int j = i - 1; j >= 0; j--)
+                    {
+                        //every other variable
+                        for (int k = varCount - 1; k >= 0; k--)
+                        {
+                            for (int p = 0; p < reps.GetLength(2); p++)
+                            {
+                                if (k != i) reps[j, k, p] *= reps[i, i, 0];
+                            }
+                        }
+                        for (int p = 0; p < reps.GetLength(2); p++)
+                        {
+                            reps[j, varCount - 1, p] += reps[j, i, 0] * reps[i, varCount - 1, p];
+                        }
+                        reps[j, i, 0] = 0;
+                    }
                 }
             }
+            else
+            {
+                for (int i = varCount - 2; i > 0; i--)
+                {
+                    //every other replace equation
+                    for (int j = i - 1; j >= 0; j--)
+                    {
+                        //every other variable
+                        for (int k = varCount - 1; k >= 0; k--)
+                        {
+                            if (k != i) reps[j, k, 0] *= reps[i, i, 0];
+                        }
+                        reps[j, varCount - 1, 0] += reps[j, i, 0] * reps[i, varCount - 1, 0];
+                        reps[j, i, 0] = 0;
+                    }
+                }
+            }
+            //reduce reps
+            List<int> repsL = new List<int>();
+            foreach (int el in reps) repsL.Add(el);
+            int gcdR = GCDArray(repsL.ToArray());
+            for (int i = 0; i < reps.GetLength(0); i++)
+            {
+                for (int j = 0; j < reps.GetLength(1); j++)
+                {
+                    for (int k = 0; k < reps.GetLength(2); k++)
+                    {
+                        if (gcdR != 0) reps[i, j, k] /= gcdR;
+                    }
+                }
+            }
+
+
+
+            if (varCount - equationCount > 1)
+            {
+                int multiplier = 1;
+                for (int i = 0; i < varCount - (varCount - equationCount + 1); i++)
+                {
+                    multiplier *= reps[i, i, 0];
+                }
+                for (int i = 0; i < equationCount; i++)//all
+                {
+                    for (int p = 0; p < reps.GetLength(2); p++)
+                    {
+                        reps[i, varCount - 1, p] *= multiplier;
+                    }
+                }
+                for (int v = varCount - (varCount - equationCount + 1); v < parametredRes.GetLength(0); v++)
+                {
+                    for (int p = 0; p < reps.GetLength(2); p++)
+                    {
+                        parametredRes[v, p + 1] *= multiplier;
+                    }
+                }
+                for (int i = 0; i < varCount - (varCount - equationCount + 1); i++)
+                {
+                    if (reps[i, i, 0] != 0)
+                    {
+                        for (int p = 1; p < parametredRes.GetLength(1); p++)
+                        {
+                            parametredRes[i, p] = reps[i, varCount - 1, p - 1] / reps[i, i, 0];
+                        } 
+                    }
+                }
+            }
+            else
+            {
+                int[] multArray = new int[varCount - 1];
+                int multiplier = 1;
+                bool zerosPresent = false;
+                for (int i = 0; i < varCount - 1; i++)
+                {
+                    multArray[i] = Math.Abs(reps[i, i, 0]);
+                    if (multArray[i] == 0)
+                    {
+                        zerosPresent = true;
+                        break;
+                    }
+                }
+                if (!zerosPresent) multiplier = LCMArray(multArray);
+                for (int i = 0; i < varCount - 1; i++)
+                {
+                    reps[i, varCount - 1, 0] *= multiplier;
+                }
+                for (int i = 0; i < varCount - 1; i++)
+                {
+                    if (reps[i, i, 0] != 0) parametredRes[i, 1] = reps[i, varCount - 1, 0] / reps[i, i, 0];
+                }
+                parametredRes[varCount - 1, 1] = multiplier;
+            }
+            
 
             //reduce parameters values
             int[] allParVals = new int[parametredRes.GetLength(0) * (parametredRes.GetLength(1) - 1)];
@@ -1004,7 +1045,7 @@ namespace CourseWork
 
             Random rnd = new Random();
             bool[] covered = new bool[equation.Length];
-            int tries = 10000;
+            int tries = 10;
             int negs = 0;
             List<int[]> remSolutions = new List<int[]>();
             for (int i = 0; i < tries; i++)
@@ -1042,7 +1083,7 @@ namespace CourseWork
                 {
                     negs++;
                     i--;
-                    if (negs > 20000) break;
+                    if (negs > 20) break;
                     continue;
                 }
                 bool solves = true;
@@ -1084,6 +1125,28 @@ namespace CourseWork
                 for (int j = 0; j < remSolutions[i].Length; j++) results[i, j] = remSolutions[i][j];
             }
             return results;
+        }
+
+        private int LCMArray(int[] numbers)
+        {
+            if (numbers == null || numbers.Length == 0)
+            {
+                throw new ArgumentException("Array must not be null or empty.");
+            }
+
+            int lcm = numbers[0];
+
+            for (int i = 1; i < numbers.Length; i++)
+            {
+                lcm = LCM(lcm, numbers[i]);
+            }
+
+            return lcm;
+        }
+
+        private int LCM(int a, int b)
+        {
+            return (a * b) / GCD(a, b);
         }
 
         private int FindRankOld(int[,] mat)

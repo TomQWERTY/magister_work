@@ -32,7 +32,7 @@ namespace CourseWork
             Height = 1200;
             Bitmap mapBit = new Bitmap(pictureBox1.Width, pictureBox1.Height);
             pictureBox1.Image = mapBit;
-            vRad = 30;
+            vRad = 20;
             places = new List<Point?>();
             transitions = new List<Point?>();
             mode = 0;
@@ -78,7 +78,7 @@ namespace CourseWork
                     {
                         if (ModifierKeys.HasFlag(Keys.Shift))
                         {
-                            Point p = new Point(e.X - vRad / 2, e.Y - vRad / 2);
+                            Point p = new Point(e.X, e.Y);
                             AddPlaceElement(p);
                         }
                         else
