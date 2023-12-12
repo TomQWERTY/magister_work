@@ -76,21 +76,43 @@ namespace CourseWork
             {
                 case 0:
                     {
-                        if (ModifierKeys.HasFlag(Keys.Shift))
+                        bool tooClose = false;
+                        for (int i = 0; i < places.Count; i++)
                         {
-                            Point p = new Point(e.X, e.Y);
-                            AddPlaceElement(p);
-                        }
-                        else
-                        {
-                            Point t = new Point(e.X, e.Y);
-                            if (ModifierKeys.HasFlag(Keys.Control))
+                            if (Math.Sqrt(Math.Pow(e.X - places[i].Value.X, 2)
+                                + Math.Pow(e.Y - places[i].Value.Y, 2)) < vRad * 2 + 20)
                             {
-                                AddTransitionElement(t, true);
+                                tooClose = true;
+                                break;
+                            }
+                        }
+                        for (int i = 0; i < transitions.Count; i++)
+                        {
+                            if (Math.Sqrt(Math.Pow(e.X - transitions[i].Value.X, 2)
+                                + Math.Pow(e.Y - transitions[i].Value.Y, 2)) < vRad * 2 + 20)
+                            {
+                                tooClose = true;
+                                break;
+                            }
+                        }
+                        if (!tooClose)
+                        {
+                            if (ModifierKeys.HasFlag(Keys.Shift))
+                            {
+                                Point p = new Point(e.X, e.Y);
+                                AddPlaceElement(p);
                             }
                             else
                             {
-                                AddTransitionElement(t, false);
+                                Point t = new Point(e.X, e.Y);
+                                if (ModifierKeys.HasFlag(Keys.Control))
+                                {
+                                    AddTransitionElement(t, true);
+                                }
+                                else
+                                {
+                                    AddTransitionElement(t, false);
+                                }
                             }
                         }
                         break;
