@@ -40,10 +40,10 @@
             radioButton1.Checked = true;
             radioButton1.Location = new Point(12, 12);
             radioButton1.Name = "radioButton1";
-            radioButton1.Size = new Size(144, 24);
+            radioButton1.Size = new Size(136, 24);
             radioButton1.TabIndex = 0;
             radioButton1.TabStop = true;
-            radioButton1.Text = "Параметричний";
+            radioButton1.Text = "Метод Фаркаса";
             radioButton1.UseVisualStyleBackColor = true;
             // 
             // radioButton2
@@ -71,10 +71,10 @@
             radioButton3.AutoSize = true;
             radioButton3.Location = new Point(12, 72);
             radioButton3.Name = "radioButton3";
-            radioButton3.Size = new Size(131, 24);
+            radioButton3.Size = new Size(141, 24);
             radioButton3.TabIndex = 3;
             radioButton3.TabStop = true;
-            radioButton3.Text = "Алаівана (опт)";
+            radioButton3.Text = "Метод Алаівана";
             radioButton3.UseVisualStyleBackColor = true;
             // 
             // MethodChooseForm

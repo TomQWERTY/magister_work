@@ -24,7 +24,7 @@ namespace CourseWork
         {
             if (radioButton1.Checked)
             {
-                at.analysisType = AnalysisType.Parametrical;
+                at.analysisType = AnalysisType.Farkas;
             }
             else if (radioButton2.Checked)
             {
@@ -32,7 +32,7 @@ namespace CourseWork
             }
             else
             {
-                at.analysisType = AnalysisType.AlOpt;
+                at.analysisType = AnalysisType.Alaivan;
             }
             DialogResult = DialogResult.OK;
         }
