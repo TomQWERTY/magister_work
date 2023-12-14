@@ -308,15 +308,62 @@ namespace CourseWork
                     }
                 }
             }
-            int[,] results = new int[c.Count, rowCountInit];
-            for (int i = 0; i < results.GetLength(0); i++)
+            int[,] solutions = new int[c.Count, rowCountInit];
+            for (int i = 0; i < solutions.GetLength(0); i++)
             {
-                for (int j = 0; j < results.GetLength(1); j++)
+                for (int j = 0; j < solutions.GetLength(1); j++)
                 {
-                    results[i, j] = c[i][j];
+                    solutions[i, j] = c[i][j];
                 }
             }
-            return results;
+            if (solutions.Length > 0)//copide from TSS
+            {
+                //reduce coefficients
+                int[] allParVals = new int[solutions.GetLength(0) * (solutions.GetLength(1) - 1)];
+                for (int v = 0, i = 0; v < solutions.GetLength(0); v++)
+                {
+                    for (int p = 1; p < solutions.GetLength(1); p++, i++)
+                    {
+                        allParVals[i] = solutions[v, p];
+                    }
+                }
+                int gcdArr = GCDArray(allParVals);
+                for (int v = 0; v < solutions.GetLength(0); v++)
+                {
+                    for (int p = 0; p < solutions.GetLength(1); p++)
+                    {
+                        solutions[v, p] /= gcdArr;
+                    }
+                }
+                //check dynamic properties
+                bool[] covered = new bool[solutions.GetLength(1)];
+                for (int i = 0; i < solutions.GetLength(1); i++)
+                {
+                    for (int j = 0; j < solutions.GetLength(0); j++)
+                    {
+                        if (solutions[j, i] != 0)
+                        {
+                            covered[i] = true;
+                            break;
+                        }
+                    }
+                    if (!covered[i])
+                    {
+                        ok = false;
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                ok = false;
+                solutions = new int[1, solutions.GetLength(1)];
+                for (int i = 0; i < solutions.GetLength(1); i++)
+                {
+                    solutions[0, i] = 0;
+                }
+            }
+            return solutions;
         }
 
         private int[,] CheckInvariantsAlOpt(int[,] c, ref bool ok)

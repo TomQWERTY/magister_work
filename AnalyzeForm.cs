@@ -40,10 +40,12 @@ namespace CourseWork
                 labels[5].ForeColor = Color.Red;
             }
             labels[5].Text += "(ранг = " + rank + ")";
+            dgvt.Columns.Add("", "");//number
+            dgvt.Columns[dgvt.ColumnCount - 1].Width = 50;
             for (int j = 0; j < tInv.GetLength(1); j++)
             {
                 dgvt.Columns.Add("", "");
-                dgvt.Columns[dgvt.ColumnCount - 1].Width = 100;
+                dgvt.Columns[dgvt.ColumnCount - 1].Width = 30;
             }
             for (int i = 0; i < tInv.GetLength(0) - 1; i++)
             {
@@ -55,31 +57,22 @@ namespace CourseWork
                 groupBox2.Width = dgvt.Width + 50;
                 Width = groupBox2.Width + 50;
             }
-            string[] lines = new string[tInv.GetLength(0)];
-            for (int j = 0; j < tInv.GetLength(0); j++)
-            {
-                string line = "";
-                for (int i = 0; i < tInv.GetLength(1); i++)
-                {
-                    line += tInv[j, i].ToString() + ", ";
-                }
-                lines[j] = line;
-            }
-            File.WriteAllLines("inv12.txt", lines);
-
-
             for (int j = 0; j < tInv.GetLength(1); j++)
             {
                 for (int i = 0; i < tInv.GetLength(0); i++)
                 {
-                    dgvt[j, i].Value = tInv[i, j];
+                    dgvt[j + 1, i].Value = tInv[i, j];
+                    dgvt[0, i].Value = "t" + (i + 1);
+                    dgvt[0, i].Style.BackColor = Color.Gray;
                 }
             }
             //
+            dgvp.Columns.Add("", "");//number
+            dgvp.Columns[dgvp.ColumnCount - 1].Width = 50;
             for (int j = 0; j < pInv.GetLength(1); j++)
             {
                 dgvp.Columns.Add("", "");
-                dgvp.Columns[dgvp.ColumnCount - 1].Width = 100;
+                dgvp.Columns[dgvp.ColumnCount - 1].Width = 30;
             }
             for (int i = 0; i < pInv.GetLength(0) - 1; i++)
             {
@@ -90,7 +83,9 @@ namespace CourseWork
             {
                 for (int i = 0; i < pInv.GetLength(0); i++)
                 {
-                    dgvp[j, i].Value = pInv[i, j];
+                    dgvp[j + 1, i].Value = pInv[i, j];
+                    dgvp[0, i].Value = "p" + (i + 1);
+                    dgvp[0, i].Style.BackColor = Color.Gray;
                 }
             }
         }
