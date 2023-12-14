@@ -12,9 +12,12 @@ namespace CourseWork
 {
     public partial class AnalyzeForm : Form
     {
+        int invColWidth, numColWidth;
         public AnalyzeForm(bool[] results, int rank, int[,] tInv, int[,] pInv, List<int> notCoveredIndsT, List<int> notCoveredIndsP)
         {
             InitializeComponent();
+            invColWidth = 30;
+            numColWidth = 50;
             Label[] labels = new Label[6] { label7, label8, label9, label10, label11, label12 };
             for (int i = 0; i < 5; i++)
             {
@@ -41,22 +44,17 @@ namespace CourseWork
             }
             labels[5].Text += "(ранг = " + rank + ")";
             dgvt.Columns.Add("", "");//number
-            dgvt.Columns[dgvt.ColumnCount - 1].Width = 50;
+            dgvt.Columns[dgvt.ColumnCount - 1].Width = numColWidth;
             for (int j = 0; j < tInv.GetLength(1); j++)
             {
                 dgvt.Columns.Add("", "");
-                dgvt.Columns[dgvt.ColumnCount - 1].Width = 30;
+                dgvt.Columns[dgvt.ColumnCount - 1].Width = invColWidth;
             }
             for (int i = 0; i < tInv.GetLength(0) - 1; i++)
             {
                 dgvt.Rows.Add();
             }
-            dgvt.Width = 100 * dgvt.ColumnCount + 30;
-            if (dgvt.Width > groupBox2.Width)
-            {
-                groupBox2.Width = dgvt.Width + 50;
-                Width = groupBox2.Width + 50;
-            }
+            dgvt.Width = invColWidth * dgvt.ColumnCount + 50;
             for (int j = 0; j < tInv.GetLength(1); j++)
             {
                 for (int i = 0; i < tInv.GetLength(0); i++)
@@ -75,17 +73,17 @@ namespace CourseWork
             }
             //
             dgvp.Columns.Add("", "");//number
-            dgvp.Columns[dgvp.ColumnCount - 1].Width = 50;
+            dgvp.Columns[dgvp.ColumnCount - 1].Width = numColWidth;
             for (int j = 0; j < pInv.GetLength(1); j++)
             {
                 dgvp.Columns.Add("", "");
-                dgvp.Columns[dgvp.ColumnCount - 1].Width = 30;
+                dgvp.Columns[dgvp.ColumnCount - 1].Width = invColWidth;
             }
             for (int i = 0; i < pInv.GetLength(0) - 1; i++)
             {
                 dgvp.Rows.Add();
             }
-            dgvp.Width = 100 * dgvp.ColumnCount + 30;
+            dgvp.Width = invColWidth * dgvp.ColumnCount + 50;
             for (int j = 0; j < pInv.GetLength(1); j++)
             {
                 for (int i = 0; i < pInv.GetLength(0); i++)

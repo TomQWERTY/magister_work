@@ -26,10 +26,8 @@ namespace CourseWork
         public ViewForm(Controller con)
         {
             InitializeComponent();
-            pictureBox1.Width = 1800;
-            pictureBox1.Height = 1000;
-            Width = 2000;
-            Height = 1200;
+            pictureBox1.Width = 1650;
+            pictureBox1.Height = 950;
             Bitmap mapBit = new Bitmap(pictureBox1.Width, pictureBox1.Height);
             pictureBox1.Image = mapBit;
             vRad = 20;

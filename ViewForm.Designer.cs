@@ -81,7 +81,7 @@
             dgv1.RowHeadersVisible = false;
             dgv1.RowHeadersWidth = 51;
             dgv1.RowTemplate.Height = 29;
-            dgv1.Size = new Size(181, 137);
+            dgv1.Size = new Size(204, 137);
             dgv1.TabIndex = 1;
             // 
             // radioButton1
@@ -162,9 +162,9 @@
             label1.AutoSize = true;
             label1.Location = new Point(12, 9);
             label1.Name = "label1";
-            label1.Size = new Size(181, 20);
+            label1.Size = new Size(172, 20);
             label1.TabIndex = 8;
-            label1.Text = "Матриця інциндентності";
+            label1.Text = "Матриця інцидентності";
             // 
             // label2
             // 
@@ -262,6 +262,7 @@
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
+            AutoSize = true;
             ClientSize = new Size(1197, 576);
             Controls.Add(groupBox3);
             Controls.Add(groupBox2);

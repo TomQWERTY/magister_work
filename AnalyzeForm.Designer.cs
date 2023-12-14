@@ -183,13 +183,14 @@
             // 
             // groupBox2
             // 
+            groupBox2.AutoSize = true;
             groupBox2.Controls.Add(label14);
             groupBox2.Controls.Add(dgvp);
             groupBox2.Controls.Add(label13);
             groupBox2.Controls.Add(dgvt);
             groupBox2.Location = new Point(12, 114);
             groupBox2.Name = "groupBox2";
-            groupBox2.Size = new Size(673, 312);
+            groupBox2.Size = new Size(673, 316);
             groupBox2.TabIndex = 1;
             groupBox2.TabStop = false;
             groupBox2.Text = "Інваріанти";
@@ -244,6 +245,7 @@
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
+            AutoSize = true;
             ClientSize = new Size(698, 438);
             Controls.Add(groupBox2);
             Controls.Add(groupBox1);
@@ -256,6 +258,7 @@
             ((System.ComponentModel.ISupportInitialize)dgvp).EndInit();
             ((System.ComponentModel.ISupportInitialize)dgvt).EndInit();
             ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
