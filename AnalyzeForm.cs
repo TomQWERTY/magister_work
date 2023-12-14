@@ -28,8 +28,10 @@ namespace CourseWork
                 }
                 else
                 {
-                    labels[i].Text = "НЕ ПІДТВЕРДЖЕНО";
-                    labels[i].ForeColor = Color.Orange;
+                    //labels[i].Text = "НЕ ПІДТВЕРДЖЕНО";
+                    //labels[i].ForeColor = Color.Orange;
+                    labels[i].Text = "НЕ ВИКОНУЄТЬСЯ";
+                    labels[i].ForeColor = Color.Red;
                 }
             }
             if (results[5])
@@ -55,6 +57,9 @@ namespace CourseWork
                 dgvt.Rows.Add();
             }
             dgvt.Width = invColWidth * dgvt.ColumnCount + 50;
+            dgvt.Height = dgvt.Rows[0].Height * dgvt.RowCount + 5;
+            dgvp.Location = new Point(dgvp.Location.X, dgvt.Location.Y + dgvt.Height + 20);
+            label14.Location = new Point(label14.Location.X, dgvt.Location.Y + dgvt.Height + 20);
             for (int j = 0; j < tInv.GetLength(1); j++)
             {
                 for (int i = 0; i < tInv.GetLength(0); i++)
@@ -84,6 +89,7 @@ namespace CourseWork
                 dgvp.Rows.Add();
             }
             dgvp.Width = invColWidth * dgvp.ColumnCount + 50;
+            dgvp.Height = dgvp.Rows[0].Height * dgvp.RowCount + 5;
             for (int j = 0; j < pInv.GetLength(1); j++)
             {
                 for (int i = 0; i < pInv.GetLength(0); i++)

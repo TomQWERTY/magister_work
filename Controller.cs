@@ -155,7 +155,7 @@ namespace CourseWork
                 {
                     tInvs = CheckInveriantsFar(w);
                 }
-                if (tInvs.Length < 0)
+                if (tInvs.Length == 0)
                 {
                     tInvs = new int[1, tInvs.GetLength(1)];
                     for (int i = 0; i < tInvs.GetLength(1); i++)
@@ -222,7 +222,7 @@ namespace CourseWork
                 {
                     pInvs = CheckInveriantsFar(w);
                 }
-                if (pInvs.Length < 0)
+                if (pInvs.Length == 0)
                 {
                     pInvs = new int[1, pInvs.GetLength(1)];
                     for (int i = 0; i < pInvs.GetLength(1); i++)
@@ -281,7 +281,7 @@ namespace CourseWork
             {
                 for (int p = 0; p < solutions.GetLength(1); p++)
                 {
-                    solutions[v, p] /= gcdArr;
+                    if (gcdArr != 0) solutions[v, p] /= gcdArr;
                 }
             }
             return solutions;
