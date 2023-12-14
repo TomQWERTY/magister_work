@@ -142,18 +142,40 @@ namespace CourseWork
                         w[i, j] = model.matrixW[i][j];
                     }
                 }
-                int[,] tInvs;
+                int tries = 10000;
+                int[,] tInvs = new int[1,1];
                 if (at == AnalysisType.TSS)
                 {
-                    tInvs = CheckInvariantsTSS(w);
+                    long sum = 0;
+                    for (int i = 0; i < tries; i++)
+                    {
+                        DateTime dt1 = DateTime.Now;
+                        tInvs = CheckInvariantsTSS(w);
+                        sum += (DateTime.Now - dt1).Ticks;
+                    }
+                    MessageBox.Show((sum * 1.0 / tries / TimeSpan.TicksPerMillisecond) + "");
                 }
                 else if (at == AnalysisType.Alaivan)
                 {
-                    tInvs = CheckInvariantsAlOpt(w);
+                    long sum = 0;
+                    for (int i = 0; i < tries; i++)
+                    {
+                        DateTime dt1 = DateTime.Now;
+                        tInvs = CheckInvariantsAlOpt(w);
+                        sum += (DateTime.Now - dt1).Ticks;
+                    }
+                    MessageBox.Show((sum * 1.0 / tries / TimeSpan.TicksPerMillisecond) + "");
                 }
                 else
                 {
-                    tInvs = CheckInveriantsFar(w);
+                    double sum = 0;
+                    for (int i = 0; i < tries; i++)
+                    {
+                        DateTime dt1 = DateTime.Now;
+                        tInvs = CheckInveriantsFar(w);
+                        sum += (DateTime.Now - dt1).Ticks;
+                    }
+                    MessageBox.Show((sum * 1.0 / tries / TimeSpan.TicksPerMillisecond) + "");
                 }
                 if (tInvs.Length == 0)
                 {
@@ -199,28 +221,35 @@ namespace CourseWork
                 if (at == AnalysisType.TSS)
                 {
                     long sum = 0;
-                    for (int i = 0; i < 1000; i++)
+                    for (int i = 0; i < tries; i++)
                     {
                         DateTime dt1 = DateTime.Now;
                         pInvs = CheckInvariantsTSS(w);
-                        sum += (DateTime.Now - dt1).Milliseconds;
+                        sum += (DateTime.Now - dt1).Ticks;
                     }
-                    MessageBox.Show((sum * 1.0 / 1000) + "");
+                    MessageBox.Show((sum * 1.0 / tries / TimeSpan.TicksPerMillisecond) + "");
                 }
                 else if (at == AnalysisType.Alaivan)
                 {
-                    /*long sum = 0;
-                    for (int i = 0; i < 1000; i++)
+                    long sum = 0;
+                    for (int i = 0; i < tries; i++)
                     {
-                        DateTime dt1 = DateTime.Now;*/
-                    pInvs = CheckInvariantsAlOpt(w);
-                    /* sum += (DateTime.Now - dt1).Ticks;
+                        DateTime dt1 = DateTime.Now;
+                        pInvs = CheckInvariantsAlOpt(w);
+                        sum += (DateTime.Now - dt1).Ticks;
                  }
-                 MessageBox.Show((sum * 1.0 / 1000) + "");*/
+                 MessageBox.Show((sum * 1.0 / tries / TimeSpan.TicksPerMillisecond) + "");
                 }
                 else
                 {
-                    pInvs = CheckInveriantsFar(w);
+                    long sum = 0;
+                    for (int i = 0; i < tries; i++)
+                    {
+                        DateTime dt1 = DateTime.Now;
+                        pInvs = CheckInveriantsFar(w);
+                        sum += (DateTime.Now - dt1).Ticks;
+                    }
+                    MessageBox.Show((sum * 1.0 / tries / TimeSpan.TicksPerMillisecond) + "");
                 }
                 if (pInvs.Length == 0)
                 {
@@ -570,6 +599,39 @@ namespace CourseWork
                                 B.Add(newColumn);
                             }
                         }
+                        for (int chk = 0; chk < B.Count; chk++)
+                        {
+                            bool hasMinSupp = true;
+                            for (int comp = 0; comp < B.Count; comp++)
+                            {
+                                bool compFine = false;
+                                for (int rowI = 0; rowI < bRowCount; rowI++)
+                                {
+                                    if (B[chk][rowI] == 0 && B[comp][rowI] != 0)
+                                    {
+                                        compFine = true;
+                                        break;
+                                    }
+                                }
+                                if (!compFine)
+                                {
+                                    for (int rowI = 0; rowI < bRowCount; rowI++)
+                                    {
+                                        if (B[chk][rowI] != 0 && B[comp][rowI] == 0)
+                                        {
+                                            hasMinSupp = false;
+                                            break;
+                                        }
+                                    }
+                                    if (!hasMinSupp) break;
+                                }
+                            }
+                            if (!hasMinSupp)
+                            {
+                                B.RemoveAt(chk);
+                                chk--;
+                            }
+                        }
                     }
                     for (int negIndI = negInds.Count - 1; negIndI >= 0; negIndI--)
                     {
@@ -578,39 +640,7 @@ namespace CourseWork
                 }
             }
             //support calculation
-            for (int chk = 0; chk < B.Count; chk++)
-            {
-                bool hasMinSupp = true;
-                for (int comp = 0; comp < B.Count; comp++)
-                {
-                    bool compFine = false;
-                    for (int rowI = 0; rowI < bRowCount; rowI++)
-                    {
-                        if (B[chk][rowI] == 0 && B[comp][rowI] != 0)
-                        {
-                            compFine = true;
-                            break;
-                        }
-                    }
-                    if (!compFine)
-                    {
-                        for (int rowI = 0; rowI < bRowCount; rowI++)
-                        {
-                            if (B[chk][rowI] != 0 && B[comp][rowI] == 0)
-                            {
-                                hasMinSupp = false;
-                                break;
-                            }
-                        }
-                        if (!hasMinSupp) break;
-                    }
-                }
-                if (!hasMinSupp)
-                {
-                    B.RemoveAt(chk);
-                    chk--;
-                }
-            }
+            
             //converting
             int[,] solutions = new int[B.Count, bRowCount];
             for (int rowI = 0; rowI < solutions.GetLength(0); rowI++)
@@ -690,48 +720,48 @@ namespace CourseWork
                     Mnew.Add(e[Mzer[zerI]]);
                 }
                 e = Mnew;//now solutions of first equation are input data for second
-            }
-            //removing redundant solutions
-            //finding t(the biggest coefficient)
-            int t = 0;
-            for (int i = 0; i < e.Count; i++)
-            {
-                int eqMax = e[i].Max();
-                if (eqMax > t)
+                         //removing redundant solutions
+                         //finding t(the biggest coefficient)
+                int t = 0;
+                for (int i_ = 0; i_ < e.Count; i_++)
                 {
-                    t = eqMax;
-                }
-            }
-            for (int i = 0; i < e.Count; i++)//check every solution
-            {
-                int[] tx = new int[varCount];//current solution multipled by t
-                for (int j = 0; j < varCount; j++)
-                {
-                    tx[j] = e[i][j] * t;
-                }
-                bool isRedundant = false;
-                for (int j = 0; j < e.Count; j++)//check with every other solution
-                {
-                    if (j == i) continue;
-                    bool isBigger = true;
-                    for (int k = 0; k < varCount; k++)
+                    int eqMax = e[i_].Max();
+                    if (eqMax > t)
                     {
-                        if (tx[k] < e[j][k])
+                        t = eqMax;
+                    }
+                }
+                for (int i_ = 0; i_ < e.Count; i_++)//check every solution
+                {
+                    int[] tx = new int[varCount];//current solution multipled by t
+                    for (int j = 0; j < varCount; j++)
+                    {
+                        tx[j] = e[i_][j] * t;
+                    }
+                    bool isRedundant = false;
+                    for (int j = 0; j < e.Count; j++)//check with every other solution
+                    {
+                        if (j == i_) continue;
+                        bool isBigger = true;
+                        for (int k = 0; k < varCount; k++)
                         {
-                            isBigger = false;
+                            if (tx[k] < e[j][k])
+                            {
+                                isBigger = false;
+                                break;
+                            }
+                        }
+                        if (isBigger)
+                        {
+                            isRedundant = true;
                             break;
                         }
                     }
-                    if (isBigger)
+                    if (isRedundant)
                     {
-                        isRedundant = true;
-                        break;
+                        e.RemoveAt(i_);
+                        i_--;
                     }
-                }
-                if (isRedundant)
-                {
-                    e.RemoveAt(i);
-                    i--;
                 }
             }
             int[,] solutions = new int[e.Count, varCount];
