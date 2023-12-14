@@ -101,7 +101,7 @@ namespace CourseWork
                     }
                 }
             }
-            
+
         }
 
         private void ActivateTransitionElement(int ind)
@@ -142,20 +142,51 @@ namespace CourseWork
                         w[i, j] = model.matrixW[i][j];
                     }
                 }
-                bool tInv = true;
                 int[,] tInvs;
                 if (at == AnalysisType.TSS)
                 {
-                    tInvs = CheckInvariantsTSS(w, ref tInv);
+                    tInvs = CheckInvariantsTSS(w);
                 }
                 else if (at == AnalysisType.Alaivan)
                 {
-                    tInvs = CheckInvariantsAlOpt(w, ref tInv);
+                    tInvs = CheckInvariantsAlOpt(w);
                 }
                 else
                 {
-                    tInvs = CheckInveriantsFar(w, ref tInv);
+                    tInvs = CheckInveriantsFar(w);
                 }
+                if (tInvs.Length < 0)
+                {
+                    tInvs = new int[1, tInvs.GetLength(1)];
+                    for (int i = 0; i < tInvs.GetLength(1); i++)
+                    {
+                        tInvs[0, i] = 0;
+                    }
+                }
+                ReduceCoefficients(tInvs);
+                //check dynamic properties
+                List<int> notCoveredIndsT = new List<int>();
+                bool[] covered = new bool[tInvs.GetLength(1)];
+                for (int i = 0; i < tInvs.GetLength(1); i++)
+                {
+                    for (int j = 0; j < tInvs.GetLength(0); j++)
+                    {
+                        if (tInvs[j, i] != 0)
+                        {
+                            covered[i] = true;
+                            break;
+                        }
+                    }
+                    if (!covered[i]) notCoveredIndsT.Add(i);
+                }
+                bool[] infoForView = new bool[6];
+                if (notCoveredIndsT.Count == 0)
+                {
+                    infoForView[0] = true;
+                    infoForView[1] = true;
+                    infoForView[2] = true;
+                }
+                //
                 w = new int[model.matrixW[0].Count, model.matrixW.Count];
                 for (int i = 0; i < w.GetLength(0); i++)
                 {
@@ -164,15 +195,14 @@ namespace CourseWork
                         w[i, j] = model.matrixW[j][i];
                     }
                 }
-                bool pInv = true;
-                int[,] pInvs = new int[1,1];
+                int[,] pInvs = new int[1, 1];
                 if (at == AnalysisType.TSS)
                 {
                     long sum = 0;
                     for (int i = 0; i < 1000; i++)
                     {
                         DateTime dt1 = DateTime.Now;
-                        pInvs = CheckInvariantsTSS(w, ref pInv);
+                        pInvs = CheckInvariantsTSS(w);
                         sum += (DateTime.Now - dt1).Milliseconds;
                     }
                     MessageBox.Show((sum * 1.0 / 1000) + "");
@@ -183,23 +213,40 @@ namespace CourseWork
                     for (int i = 0; i < 1000; i++)
                     {
                         DateTime dt1 = DateTime.Now;*/
-                        pInvs = CheckInvariantsAlOpt(w, ref pInv);
-                       /* sum += (DateTime.Now - dt1).Ticks;
-                    }
-                    MessageBox.Show((sum * 1.0 / 1000) + "");*/
+                    pInvs = CheckInvariantsAlOpt(w);
+                    /* sum += (DateTime.Now - dt1).Ticks;
+                 }
+                 MessageBox.Show((sum * 1.0 / 1000) + "");*/
                 }
                 else
                 {
-                    pInvs = CheckInveriantsFar(w, ref pInv);
+                    pInvs = CheckInveriantsFar(w);
                 }
-                bool[] infoForView = new bool[6];
-                if (tInv)
+                if (pInvs.Length < 0)
                 {
-                    infoForView[0] = true;
-                    infoForView[1] = true;
-                    infoForView[2] = true;
+                    pInvs = new int[1, pInvs.GetLength(1)];
+                    for (int i = 0; i < pInvs.GetLength(1); i++)
+                    {
+                        pInvs[0, i] = 0;
+                    }
                 }
-                if (pInv)
+                ReduceCoefficients(pInvs);
+                //check dynamic properties
+                List<int> notCoveredIndsP = new List<int>();
+                covered = new bool[pInvs.GetLength(1)];
+                for (int i = 0; i < pInvs.GetLength(1); i++)
+                {
+                    for (int j = 0; j < pInvs.GetLength(0); j++)
+                    {
+                        if (pInvs[j, i] != 0)
+                        {
+                            covered[i] = true;
+                            break;
+                        }
+                    }
+                    if (!covered[i]) notCoveredIndsP.Add(i);
+                }
+                if (notCoveredIndsP.Count == 0)
                 {
                     infoForView[3] = true;
                     infoForView[4] = true;
@@ -215,11 +262,32 @@ namespace CourseWork
                 {
                     infoForView[5] = true;
                 }
-                view.ShowResults(infoForView, rank, tInvs, pInvs);
+                view.ShowResults(infoForView, rank, tInvs, pInvs, notCoveredIndsT, notCoveredIndsP);
             }
         }
 
-        private int[,] CheckInveriantsFar(int[,] wInv, ref bool ok)
+        private int[,] ReduceCoefficients(int[,] solutions)
+        {
+            int[] allParVals = new int[solutions.GetLength(0) * (solutions.GetLength(1) - 1)];
+            for (int v = 0, i = 0; v < solutions.GetLength(0); v++)
+            {
+                for (int p = 1; p < solutions.GetLength(1); p++, i++)
+                {
+                    allParVals[i] = solutions[v, p];
+                }
+            }
+            int gcdArr = GCDArray(allParVals);
+            for (int v = 0; v < solutions.GetLength(0); v++)
+            {
+                for (int p = 0; p < solutions.GetLength(1); p++)
+                {
+                    solutions[v, p] /= gcdArr;
+                }
+            }
+            return solutions;
+        }
+
+        private int[,] CheckInveriantsFar(int[,] wInv)
         {
             //inverting a matrix
             int[,] w = new int[wInv.GetLength(1), wInv.GetLength(0)];
@@ -316,57 +384,10 @@ namespace CourseWork
                     solutions[i, j] = c[i][j];
                 }
             }
-            if (solutions.Length > 0)//copide from TSS
-            {
-                //reduce coefficients
-                int[] allParVals = new int[solutions.GetLength(0) * (solutions.GetLength(1) - 1)];
-                for (int v = 0, i = 0; v < solutions.GetLength(0); v++)
-                {
-                    for (int p = 1; p < solutions.GetLength(1); p++, i++)
-                    {
-                        allParVals[i] = solutions[v, p];
-                    }
-                }
-                int gcdArr = GCDArray(allParVals);
-                for (int v = 0; v < solutions.GetLength(0); v++)
-                {
-                    for (int p = 0; p < solutions.GetLength(1); p++)
-                    {
-                        solutions[v, p] /= gcdArr;
-                    }
-                }
-                //check dynamic properties
-                bool[] covered = new bool[solutions.GetLength(1)];
-                for (int i = 0; i < solutions.GetLength(1); i++)
-                {
-                    for (int j = 0; j < solutions.GetLength(0); j++)
-                    {
-                        if (solutions[j, i] != 0)
-                        {
-                            covered[i] = true;
-                            break;
-                        }
-                    }
-                    if (!covered[i])
-                    {
-                        ok = false;
-                        break;
-                    }
-                }
-            }
-            else
-            {
-                ok = false;
-                solutions = new int[1, solutions.GetLength(1)];
-                for (int i = 0; i < solutions.GetLength(1); i++)
-                {
-                    solutions[0, i] = 0;
-                }
-            }
             return solutions;
         }
 
-        private int[,] CheckInvariantsAlOpt(int[,] c, ref bool ok)
+        private int[,] CheckInvariantsAlOpt(int[,] c)
         {
 			List<int[]> eM = new List<int[]>();//extended matrix (first index is column)
 			int cRowCount = c.GetLength(0);
@@ -599,58 +620,11 @@ namespace CourseWork
                     solutions[rowI, colI] = B[rowI][colI];
                 }
             }
-            if (solutions.Length > 0)//copide from TSS
-            {
-                //reduce coefficients
-                int[] allParVals = new int[solutions.GetLength(0) * (solutions.GetLength(1) - 1)];
-                for (int v = 0, i = 0; v < solutions.GetLength(0); v++)
-                {
-                    for (int p = 1; p < solutions.GetLength(1); p++, i++)
-                    {
-                        allParVals[i] = solutions[v, p];
-                    }
-                }
-                int gcdArr = GCDArray(allParVals);
-                for (int v = 0; v < solutions.GetLength(0); v++)
-                {
-                    for (int p = 0; p < solutions.GetLength(1); p++)
-                    {
-                        solutions[v, p] /= gcdArr;
-                    }
-                }
-                //check dynamic properties
-                bool[] covered = new bool[solutions.GetLength(1)];
-                for (int i = 0; i < solutions.GetLength(1); i++)
-                {
-                    for (int j = 0; j < solutions.GetLength(0); j++)
-                    {
-                        if (solutions[j, i] != 0)
-                        {
-                            covered[i] = true;
-                            break;
-                        }
-                    }
-                    if (!covered[i])
-                    {
-                        ok = false;
-                        break;
-                    }
-                }
-            }
-            else
-            {
-                ok = false;
-                solutions = new int[1, solutions.GetLength(1)];
-                for (int i = 0; i < solutions.GetLength(1); i++)
-                {
-                    solutions[0, i] = 0;
-                }
-            }
             return solutions;
         }
 
 
-        private int[,] CheckInvariantsTSS(int[,] w, ref bool ok)
+        private int[,] CheckInvariantsTSS(int[,] w)
         {
             int varCount = w.GetLength(1);
             int eqCount = w.GetLength(0);
@@ -766,53 +740,6 @@ namespace CourseWork
                 for (int j = 0; j < varCount; j++)
                 {
                     solutions[i, j] = e[i][j];
-                }
-            }
-            if (solutions.Length > 0)
-            {
-                //reduce coefficients
-                int[] allParVals = new int[solutions.GetLength(0) * (solutions.GetLength(1) - 1)];
-                for (int v = 0, i = 0; v < solutions.GetLength(0); v++)
-                {
-                    for (int p = 1; p < solutions.GetLength(1); p++, i++)
-                    {
-                        allParVals[i] = solutions[v, p];
-                    }
-                }
-                int gcdArr = GCDArray(allParVals);
-                for (int v = 0; v < solutions.GetLength(0); v++)
-                {
-                    for (int p = 0; p < solutions.GetLength(1); p++)
-                    {
-                        solutions[v, p] /= gcdArr;
-                    }
-                }
-                //check dynamic properties
-                bool[] covered = new bool[varCount];
-                for (int i = 0; i < varCount; i++)
-                {
-                    for (int j = 0; j < solutions.GetLength(0); j++)
-                    {
-                        if (solutions[j, i] != 0)
-                        {
-                            covered[i] = true;
-                            break;
-                        }
-                    }
-                    if (!covered[i])
-                    {
-                        ok = false;
-                        break;
-                    }
-                }
-            }
-            else
-            {
-                ok = false;
-                solutions = new int[1, varCount];
-                for (int i = 0; i <  solutions.GetLength(1); i++)
-                {
-                    solutions[0, i] = 0;
                 }
             }
             return solutions;

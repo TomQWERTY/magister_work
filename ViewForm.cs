@@ -445,9 +445,9 @@ namespace CourseWork
             controller.Analyze();
         }
 
-        public void ShowResults(bool[] results, int rank, int[,] tInv, int[,] pInv)
+        public void ShowResults(bool[] results, int rank, int[,] tInv, int[,] pInv, List<int> notCoveredIndsT, List<int> notCoveredIndsP)
         {
-            analyzeForm = new AnalyzeForm(results, rank, tInv, pInv);
+            analyzeForm = new AnalyzeForm(results, rank, tInv, pInv, notCoveredIndsT, notCoveredIndsP);
             analyzeForm.Show();
         }
 

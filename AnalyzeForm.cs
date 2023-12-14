@@ -12,7 +12,7 @@ namespace CourseWork
 {
     public partial class AnalyzeForm : Form
     {
-        public AnalyzeForm(bool[] results, int rank, int[,] tInv, int[,] pInv)
+        public AnalyzeForm(bool[] results, int rank, int[,] tInv, int[,] pInv, List<int> notCoveredIndsT, List<int> notCoveredIndsP)
         {
             InitializeComponent();
             Label[] labels = new Label[6] { label7, label8, label9, label10, label11, label12 };
@@ -66,6 +66,13 @@ namespace CourseWork
                     dgvt[0, i].Style.BackColor = Color.Gray;
                 }
             }
+            for (int ni = 0; ni < notCoveredIndsT.Count; ni++)
+            {
+                for (int r = 0; r < dgvt.Rows.Count; r++)
+                {
+                    dgvt[notCoveredIndsT[ni] + 1, r].Style.BackColor = Color.PaleVioletRed;
+                }
+            }
             //
             dgvp.Columns.Add("", "");//number
             dgvp.Columns[dgvp.ColumnCount - 1].Width = 50;
@@ -86,6 +93,13 @@ namespace CourseWork
                     dgvp[j + 1, i].Value = pInv[i, j];
                     dgvp[0, i].Value = "p" + (i + 1);
                     dgvp[0, i].Style.BackColor = Color.Gray;
+                }
+            }
+            for (int ni = 0; ni < notCoveredIndsP.Count; ni++)
+            {
+                for (int r = 0; r < dgvp.Rows.Count; r++)
+                {
+                    dgvp[notCoveredIndsP[ni] + 1, r].Style.BackColor = Color.PaleVioletRed;
                 }
             }
         }
