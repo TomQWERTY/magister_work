@@ -39,3 +39,4 @@ F:\Univer\practic_1\done_in_coursework\CourseWork\obj\Debug\net6.0-windows\ref\C
 F:\Univer\practic_1\done_in_coursework\CourseWork\obj\Debug\net6.0-windows\CourseWork.MethodChooseForm.resources
 F:\Univer\practic_1\done_in_coursework\CourseWork\bin\Debug\net6.0-windows\Newtonsoft.Json.dll
 F:\Univer\practic_1\done_in_coursework\CourseWork\obj\Debug\net6.0-windows\CourseWork.csproj.CopyComplete
+F:\Univer\practic_1\done_in_coursework\CourseWork\bin\Debug\net6.0-windows\MathNet.Numerics.dll

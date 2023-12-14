@@ -62,7 +62,7 @@
             pictureBox1.BackColor = Color.White;
             pictureBox1.Location = new Point(222, 32);
             pictureBox1.Name = "pictureBox1";
-            pictureBox1.Size = new Size(958, 509);
+            pictureBox1.Size = new Size(972, 532);
             pictureBox1.TabIndex = 0;
             pictureBox1.TabStop = false;
             pictureBox1.Paint += pictureBox1_Paint;
@@ -81,7 +81,7 @@
             dgv1.RowHeadersVisible = false;
             dgv1.RowHeadersWidth = 51;
             dgv1.RowTemplate.Height = 29;
-            dgv1.Size = new Size(204, 117);
+            dgv1.Size = new Size(181, 137);
             dgv1.TabIndex = 1;
             // 
             // radioButton1
@@ -150,7 +150,7 @@
             groupBox1.Controls.Add(radioButton2);
             groupBox1.Controls.Add(radioButton4);
             groupBox1.Controls.Add(radioButton3);
-            groupBox1.Location = new Point(12, 155);
+            groupBox1.Location = new Point(12, 175);
             groupBox1.Name = "groupBox1";
             groupBox1.Size = new Size(204, 147);
             groupBox1.TabIndex = 7;
@@ -181,7 +181,7 @@
             groupBox2.Controls.Add(checkBox1);
             groupBox2.Controls.Add(button2);
             groupBox2.Controls.Add(button1);
-            groupBox2.Location = new Point(12, 308);
+            groupBox2.Location = new Point(12, 328);
             groupBox2.Name = "groupBox2";
             groupBox2.Size = new Size(204, 131);
             groupBox2.TabIndex = 10;
@@ -223,7 +223,7 @@
             // 
             groupBox3.Controls.Add(button4);
             groupBox3.Controls.Add(button3);
-            groupBox3.Location = new Point(12, 445);
+            groupBox3.Location = new Point(12, 465);
             groupBox3.Name = "groupBox3";
             groupBox3.Size = new Size(204, 96);
             groupBox3.TabIndex = 11;
@@ -262,7 +262,7 @@
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1197, 550);
+            ClientSize = new Size(1197, 576);
             Controls.Add(groupBox3);
             Controls.Add(groupBox2);
             Controls.Add(label2);

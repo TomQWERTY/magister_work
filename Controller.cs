@@ -8,6 +8,7 @@ using System.Runtime.InteropServices;
 using System.Security.AccessControl;
 using System.Text;
 using System.Threading.Tasks;
+using MathNet.Numerics.LinearAlgebra;
 
 namespace CourseWork
 {
@@ -203,15 +204,13 @@ namespace CourseWork
                     infoForView[3] = true;
                     infoForView[4] = true;
                 }
-                w = new int[model.matrixW[0].Count, model.matrixW.Count];
-                for (int i = 0; i < w.GetLength(0); i++)
+                double[,] matrixDataForRank = new double[model.matrixW.Count, model.matrixW[0].Count];
+                for (int i = 0; i < matrixDataForRank.GetLength(0); i++)
                 {
-                    for (int j = 0; j < w.GetLength(1); j++)
-                    {
-                        w[i, j] = model.matrixW[j][i];
-                    }
+                    for (int j = 0; j < matrixDataForRank.GetLength(1); j++) matrixDataForRank[i, j] = model.matrixW[i][j];
                 }
-                int rank = FindRank(w);
+                var matrixForRank = Matrix<double>.Build.DenseOfArray(matrixDataForRank);
+                int rank = matrixForRank.Rank();
                 if (rank >= Math.Min(model.matrixW.Count, model.matrixW[0].Count))
                 {
                     infoForView[5] = true;
@@ -770,124 +769,6 @@ namespace CourseWork
                 }
             }
             return solutions;
-        }
-
-        private int FindRankOld(int[,] mat)
-        {
-            int rank = mat.GetLength(1);
-            for (int row = 0; row < Math.Min(rank, mat.GetLength(0)); row++)
-            {
-                if (mat[row, row] != 0)
-                {
-                    for (int col = 0; col < Math.Min(mat.GetLength(1), mat.GetLength(0)); col++)
-                    {
-                        if (col != row)
-                        {
-                            double mult =
-                            (double)mat[col, row] /
-                                        mat[row, row];
-
-                            for (int i = 0; i < rank; i++)
-
-                                mat[col, i] -= (int)mult
-                                        * mat[row, i];
-                        }
-                    }
-                }
-                else
-                {
-                    bool reduce = true;
-                    for (int i = row + 1; i < mat.GetLength(0); i++)
-                    {
-                        if (mat[i, row] != 0)
-                        {
-                            SwapRows(mat, row, i, rank);
-                            reduce = false;
-                            break;
-                        }
-                    }
-                    if (reduce)
-                    {
-                        rank--;
-                        for (int i = 0; i < mat.GetLength(0); i++)
-                            mat[i, row] = mat[i, rank];
-                    }
-                    row--;
-                }
-            }
-            return rank;
-        }
-
-        private int FindRank(int[,] mat)
-        {
-            double[,] matrix = new double[mat.GetLength(0), mat.GetLength(1)];
-            for (int i = 0; i < matrix.GetLength(0); i++)
-            {
-                for (int j = 0; j < mat.GetLength(1); j++) matrix[i, j] = mat[i, j];
-            }
-
-            int rowCount = matrix.GetLength(0);
-            int colCount = matrix.GetLength(1);
-
-            int rank = 0;
-
-            // Apply Gaussian elimination
-            for (int i = 0; i < Math.Min(rowCount, colCount); i++)
-            {
-                // Find the pivot element
-                int pivotRow = -1;
-                if (matrix[i, i] != 0)
-                {
-                    pivotRow = i;
-                }
-                /*for (int j = 0; j < colCount; j++)
-                {
-                    if (matrix[i, j] != 0)
-                    {
-                        pivotRow = i;
-                        break;
-                    }
-                }*/
-
-                // If a pivot element is found
-                if (pivotRow != -1)
-                {
-                    // Increment the rank
-                    rank++;
-
-                    // Normalize the pivot row if the pivot value is not zero
-                    double pivotValue = matrix[pivotRow, pivotRow];
-                    for (int j = 0; j < colCount; j++)
-                    {
-                        matrix[pivotRow, j] /= pivotValue;
-                    }
-
-                    // Eliminate non-zero elements in the current column
-                    for (int k = 0; k < rowCount; k++)
-                    {
-                        if (k != pivotRow)
-                        {
-                            double factor = matrix[k, i];
-                            for (int j = 0; j < colCount; j++)
-                            {
-                                matrix[k, j] -= factor * matrix[pivotRow, j];
-                            }
-                        }
-                    }
-                }
-            }
-
-            return rank;
-        }
-
-        private void SwapRows(int[,] mat, int row1, int row2, int col)
-        {
-            for (int i = 0; i < col; i++)
-            {
-                int temp = mat[row1, i];
-                mat[row1, i] = mat[row2, i];
-                mat[row2, i] = temp;
-            }
         }
 
         private int GCD(int a, int b)

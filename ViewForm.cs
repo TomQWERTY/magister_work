@@ -400,7 +400,7 @@ namespace CourseWork
                 viewSaveData.horizontal = horizontal;
                 viewSaveData.connections = connections;
                 controller.SaveData(saveFileDialog1.FileName, viewSaveData);
-            }           
+            }
         }
 
         private void button4_Click(object sender, EventArgs e)
