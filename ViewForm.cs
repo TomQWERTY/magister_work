@@ -77,6 +77,15 @@ namespace CourseWork
                                 + Math.Pow(e.Y - places[i].Value.Y, 2)) < vRad * 2 + 20)
                             {
                                 tooClose = true;
+                                if (i == places.Count - 1)
+                                {
+                                    if (controller.TryDeleteLastPlace())
+                                    {
+                                        dgv1.Rows.RemoveAt(dgv1.RowCount - 1);
+                                        places.RemoveAt(places.Count - 1);
+                                        Repaint();
+                                    }
+                                }
                                 break;
                             }
                         }
@@ -86,6 +95,20 @@ namespace CourseWork
                                 + Math.Pow(e.Y - transitions[i].Value.Y, 2)) < vRad * 2 + 20)
                             {
                                 tooClose = true;
+                                if (i == transitions.Count - 1)
+                                {
+                                    if (controller.TryDeleteLastTransition())
+                                    {
+                                        dgv1.Columns.RemoveAt(dgv1.ColumnCount - 1);
+                                        transitions.RemoveAt(transitions.Count - 1);
+                                        Repaint();
+                                        if (dgv1.ColumnCount == 0)
+                                        {
+                                            dgv1.Columns.Add("", "");
+                                            dgv1.Columns[dgv1.Columns.Count - 1].Width = 50;
+                                        }
+                                    }
+                                }
                                 break;
                             }
                         }
@@ -156,6 +179,7 @@ namespace CourseWork
                                     }
                                     break;
                                 }
+                                else Repaint();
                             }
                             firstSelected = null;
                         }
@@ -175,6 +199,7 @@ namespace CourseWork
                                     }
                                     break;
                                 }
+                                else Repaint();
                             }
                             firstSelected = null;
                         }

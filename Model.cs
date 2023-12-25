@@ -105,6 +105,47 @@ namespace CourseWork
             viewSaveData = saveData.viewSaveData;
         }
 
+        public bool TryDeleteLastPlace()
+        {
+            if (matrixW.Count == 1) return false;
+            bool allZeros = true;
+            for (int i = 0; i < matrixW.Last().Count; i++)
+            {
+                if (matrixW.Last()[i] != 0)
+                {
+                    allZeros = false;
+                    break;
+                }
+            }
+            if (allZeros)
+            {
+                matrixW.RemoveAt(matrixW.Count - 1);
+                marking.RemoveAt(marking.Count - 1);
+            }
+            return allZeros;
+        }
+
+        public bool TryDeleteLastTransition()
+        {
+            bool allZeros = true;
+            for (int i = 0; i < matrixW.Count; i++)
+            {
+                if (matrixW[i][matrixW[0].Count - 1] != 0)
+                {
+                    allZeros = false;
+                    break;
+                }
+            }
+            if (allZeros)
+            {
+                for (int i = 0; i < matrixW.Count; i++)
+                {
+                    matrixW[i].RemoveAt(matrixW[0].Count - 1);
+                }
+            }
+            return allZeros;
+        }
+
         public void UpdateTokens()
         {
             for (int i = 0; i < marking.Count; i++)

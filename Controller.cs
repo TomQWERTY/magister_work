@@ -61,6 +61,16 @@ namespace CourseWork
             model.AddTokens(ind, num);
         }
 
+        public bool TryDeleteLastPlace()
+        {
+            return model.TryDeleteLastPlace();
+        }
+
+        public bool TryDeleteLastTransition()
+        {
+            return model.TryDeleteLastTransition();
+        }
+
         public void ImitationStep()
         {
             List<int> availableIndexes = new List<int>();
