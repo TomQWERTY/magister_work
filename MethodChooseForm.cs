@@ -30,9 +30,21 @@ namespace CourseWork
             {
                 at.analysisType = AnalysisType.TSS;
             }
-            else
+            else if (radioButton3.Checked)
             {
                 at.analysisType = AnalysisType.Alaivan;
+            }
+            else if (radioButton4.Checked)
+            {
+                at.analysisType = AnalysisType.TSSMod;
+            }
+            else if (radioButton5.Checked)
+            {
+                at.analysisType = AnalysisType.TSSOpt;
+            }
+            else
+            {
+                at.analysisType = AnalysisType.AlaivanOpt;
             }
             DialogResult = DialogResult.OK;
         }

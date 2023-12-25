@@ -8,7 +8,7 @@ namespace CourseWork
 {
     public enum AnalysisType
     {
-        Farkas, TSS, Alaivan, None
+        Farkas, TSS, Alaivan, TSSOpt, AlaivanOpt, TSSMod, None
     }
 
     public class AnalysisTypeClassWrapper
