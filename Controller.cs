@@ -23,6 +23,11 @@ namespace CourseWork
             model = new Model(view);
         }
 
+        public void NewModel()
+        {
+            model = new Model(view);
+        }
+
         public void Run()
         {
             Application.Run(view);

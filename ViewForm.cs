@@ -28,39 +28,32 @@ namespace CourseWork
             InitializeComponent();
             pictureBox1.Width = 1650;
             pictureBox1.Height = 950;
-            Bitmap mapBit = new Bitmap(pictureBox1.Width, pictureBox1.Height);
-            pictureBox1.Image = mapBit;
             vRad = 20;
-            places = new List<Point?>();
-            transitions = new List<Point?>();
             mode = 0;
             pPen = new Pen(Color.Black, 5);
             tPen = new Pen(Color.Black, 10);
             lPen = new Pen(Color.Black, 2);
             AdjustableArrowCap bigArrow = new AdjustableArrowCap(5, 5);
             lPen.CustomEndCap = bigArrow;
-            gr = Graphics.FromImage(pictureBox1.Image);
             controller = con;
+            
+            NewModelInit();
+            
+        }
+
+        private void NewModelInit()
+        {
+            pictureBox1.Image = new Bitmap(pictureBox1.Width, pictureBox1.Height);
+            gr = Graphics.FromImage(pictureBox1.Image);
+            places = new List<Point?>();
+            transitions = new List<Point?>();
             placeInConnSelected = null;
             firstSelected = null;
             horizontal = new List<int>();
             connections = new List<string>();
-
-            //dgv block
+            for (int i = dgv1.ColumnCount - 1; i >= 0; i--) dgv1.Columns.RemoveAt(i);
             dgv1.Columns.Add("", "");
             dgv1.Columns[dgv1.Columns.Count - 1].Width = 50;
-            /*dgv1.Columns.Add("", "");
-            dgv1.Columns.Add("", "");
-            dgv1.Columns.Add("", "");
-            dgv1.Columns.Add("", "");
-            dgv1.Rows.Add();
-            dgv1.Rows.Add();
-            dgv1.Rows.Add();
-            dgv1.Rows.Add();
-            foreach (DataGridViewTextBoxColumn d in dgv1.Columns)
-            {
-                d.Width = 50;
-            }*/
             comboBox1.SelectedIndex = 0;
         }
 
@@ -406,6 +399,8 @@ namespace CourseWork
         {
             if (openFileDialog1.ShowDialog() == DialogResult.OK)
             {
+                controller.NewModel();
+                NewModelInit();
                 ViewSaveData viewSaveData;
                 controller.LoadData(openFileDialog1.FileName, out viewSaveData);
                 horizontal = viewSaveData.horizontal;
