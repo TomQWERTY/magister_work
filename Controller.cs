@@ -134,6 +134,8 @@ namespace CourseWork
             model.UpdateView();
         }
 
+        public void UpdateTokens() { model.UpdateTokens(); }
+
         public void Analyze(bool getTime, int tries)
         {
             AnalysisType at = view.GetAnalysisMethod();

@@ -105,6 +105,14 @@ namespace CourseWork
             viewSaveData = saveData.viewSaveData;
         }
 
+        public void UpdateTokens()
+        {
+            for (int i = 0; i < marking.Count; i++)
+            {
+                view.ModifyTokens(i, marking[i], false);
+            }
+        }
+        
         public void UpdateView()
         {
             int initialCount = marking.Count / 2;
@@ -112,10 +120,7 @@ namespace CourseWork
             {
                 marking.RemoveAt(i);
             }
-            for (int i = 0; i < marking.Count; i++)
-            {
-                view.ModifyTokens(i, marking[i], false);
-            }
+            UpdateTokens();
             initialCount = matrixW.Count / 2;
             for (int i = matrixW.Count - 1; i >= initialCount; i--)
             {

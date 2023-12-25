@@ -37,9 +37,9 @@ namespace CourseWork
             AdjustableArrowCap bigArrow = new AdjustableArrowCap(5, 5);
             lPen.CustomEndCap = bigArrow;
             controller = con;
-            
+
             NewModelInit();
-            
+
         }
 
         private void NewModelInit()
@@ -463,7 +463,6 @@ namespace CourseWork
             {
                 Point p = new Point(places[i].Value.X - vRad, places[i].Value.Y - vRad);
                 gr.DrawEllipse(pPen, new Rectangle(p, new Size(vRad * 2, vRad * 2)));
-                controller.AddPlaceElement();//kost
                 WriteElementName(true, i);
             }
             for (int i = 0, j = 0; i < transitions.Count; i++)
@@ -491,7 +490,7 @@ namespace CourseWork
                 DrawConnNoRefr(new Point(Convert.ToInt32(p1Data[0]), Convert.ToInt32(p1Data[1])),
                     new Point(Convert.ToInt32(p2Data[0]), Convert.ToInt32(p2Data[1])), Convert.ToInt32(connData[2]));
             }
-            controller.UpdateView();
+            controller.UpdateTokens();
             pictureBox1.Refresh();
         }
 
@@ -537,6 +536,15 @@ namespace CourseWork
             MethodChooseForm mcf = new MethodChooseForm(at);
             mcf.ShowDialog();
             return at.analysisType;
+        }
+
+        private void pictureBox1_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (firstSelected != null)
+            {
+                Repaint();
+                DrawConnection(firstClick, new Point(e.X, e.Y), 1);
+            }
         }
     }
 }

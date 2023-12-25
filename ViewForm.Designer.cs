@@ -68,6 +68,7 @@
             pictureBox1.TabStop = false;
             pictureBox1.Paint += pictureBox1_Paint;
             pictureBox1.MouseClick += pictureBox1_MouseClick;
+            pictureBox1.MouseMove += pictureBox1_MouseMove;
             // 
             // dgv1
             // 
