@@ -40,6 +40,7 @@
             label1 = new Label();
             label2 = new Label();
             groupBox2 = new GroupBox();
+            comboBox1 = new ComboBox();
             numericUpDown1 = new NumericUpDown();
             checkBox1 = new CheckBox();
             button2 = new Button();
@@ -177,6 +178,7 @@
             // 
             // groupBox2
             // 
+            groupBox2.Controls.Add(comboBox1);
             groupBox2.Controls.Add(numericUpDown1);
             groupBox2.Controls.Add(checkBox1);
             groupBox2.Controls.Add(button2);
@@ -187,6 +189,16 @@
             groupBox2.TabIndex = 10;
             groupBox2.TabStop = false;
             groupBox2.Text = "Імітація";
+            // 
+            // comboBox1
+            // 
+            comboBox1.DropDownStyle = ComboBoxStyle.DropDownList;
+            comboBox1.FormattingEnabled = true;
+            comboBox1.Items.AddRange(new object[] { "Off", "1", "10", "100", "1000", "10000" });
+            comboBox1.Location = new Point(119, 94);
+            comboBox1.Name = "comboBox1";
+            comboBox1.Size = new Size(71, 28);
+            comboBox1.TabIndex = 12;
             // 
             // numericUpDown1
             // 
@@ -213,7 +225,7 @@
             // 
             button2.Location = new Point(6, 93);
             button2.Name = "button2";
-            button2.Size = new Size(131, 29);
+            button2.Size = new Size(107, 29);
             button2.TabIndex = 11;
             button2.Text = "Аналіз";
             button2.UseVisualStyleBackColor = true;
@@ -307,5 +319,6 @@
         private NumericUpDown numericUpDown1;
         private CheckBox checkBox1;
         private System.Windows.Forms.Timer timer1;
+        private ComboBox comboBox1;
     }
 }

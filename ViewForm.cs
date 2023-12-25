@@ -61,6 +61,7 @@ namespace CourseWork
             {
                 d.Width = 50;
             }*/
+            comboBox1.SelectedIndex = 0;
         }
 
         private void pictureBox1_Paint(object sender, PaintEventArgs e)
@@ -440,11 +441,22 @@ namespace CourseWork
 
         private void button2_Click(object sender, EventArgs e)
         {
-            controller.Analyze();
+            controller.Analyze(!(comboBox1.SelectedIndex == 0),
+                comboBox1.SelectedIndex == 0 ? 1 : Convert.ToInt32(comboBox1.SelectedItem));
         }
 
-        public void ShowResults(bool[] results, int rank, int[,] tInv, int[,] pInv, List<int> notCoveredIndsT, List<int> notCoveredIndsP)
+        public void ShowResults(bool[] results, int rank, int[,] tInv, int[,] pInv, List<int> notCoveredIndsT,
+            List<int> notCoveredIndsP)
         {
+            analyzeForm = new AnalyzeForm(results, rank, tInv, pInv, notCoveredIndsT, notCoveredIndsP);
+            analyzeForm.Show();
+        }
+
+        public void ShowResults(bool[] results, int rank, int[,] tInv, int[,] pInv, List<int> notCoveredIndsT,
+            List<int> notCoveredIndsP, string tInvsTime, string pInvsTime)
+        {
+            MessageBox.Show("Час розрахунку T-інваріантів: " + tInvsTime + " мс\n" +
+                "Час розрахунку P-інваріантів: " + pInvsTime + " мс");
             analyzeForm = new AnalyzeForm(results, rank, tInv, pInv, notCoveredIndsT, notCoveredIndsP);
             analyzeForm.Show();
         }

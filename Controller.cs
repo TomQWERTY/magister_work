@@ -129,7 +129,7 @@ namespace CourseWork
             model.UpdateView();
         }
 
-        public void Analyze()
+        public void Analyze(bool getTime, int tries)
         {
             AnalysisType at = view.GetAnalysisMethod();
             if (at != AnalysisType.None)
@@ -142,41 +142,20 @@ namespace CourseWork
                         w[i, j] = model.matrixW[i][j];
                     }
                 }
-                int tries = 10000;
-                int[,] tInvs = new int[1,1];
-                if (at == AnalysisType.TSS)
+                long sum = 0;
+                int[,] tInvs = new int[1, 1];
+                for (int i = 0; i < tries; i++)
                 {
-                    long sum = 0;
-                    for (int i = 0; i < tries; i++)
+                    DateTime dt1 = DateTime.Now;
+                    switch (at)
                     {
-                        DateTime dt1 = DateTime.Now;
-                        tInvs = CheckInvariantsTSS(w);
-                        sum += (DateTime.Now - dt1).Ticks;
+                        case AnalysisType.TSS: tInvs = CheckInvariantsTSS(w); break;
+                        case AnalysisType.Alaivan: tInvs = CheckInvariantsAlOpt(w); break;
+                        case AnalysisType.Farkas: tInvs = CheckInvariantsFar(w); break;
                     }
-                    MessageBox.Show((sum * 1.0 / tries / TimeSpan.TicksPerMillisecond) + "");
+                    sum += (DateTime.Now - dt1).Ticks;
                 }
-                else if (at == AnalysisType.Alaivan)
-                {
-                    long sum = 0;
-                    for (int i = 0; i < tries; i++)
-                    {
-                        DateTime dt1 = DateTime.Now;
-                        tInvs = CheckInvariantsAlOpt(w);
-                        sum += (DateTime.Now - dt1).Ticks;
-                    }
-                    MessageBox.Show((sum * 1.0 / tries / TimeSpan.TicksPerMillisecond) + "");
-                }
-                else
-                {
-                    double sum = 0;
-                    for (int i = 0; i < tries; i++)
-                    {
-                        DateTime dt1 = DateTime.Now;
-                        tInvs = CheckInveriantsFar(w);
-                        sum += (DateTime.Now - dt1).Ticks;
-                    }
-                    MessageBox.Show((sum * 1.0 / tries / TimeSpan.TicksPerMillisecond) + "");
-                }
+                string tInvsTime = (sum * 1.0 / tries / TimeSpan.TicksPerMillisecond) + "";
                 if (tInvs.Length == 0)
                 {
                     tInvs = new int[1, tInvs.GetLength(1)];
@@ -218,39 +197,19 @@ namespace CourseWork
                     }
                 }
                 int[,] pInvs = new int[1, 1];
-                if (at == AnalysisType.TSS)
+                sum = 0;
+                for (int i = 0; i < tries; i++)
                 {
-                    long sum = 0;
-                    for (int i = 0; i < tries; i++)
+                    DateTime dt1 = DateTime.Now;
+                    switch (at)
                     {
-                        DateTime dt1 = DateTime.Now;
-                        pInvs = CheckInvariantsTSS(w);
-                        sum += (DateTime.Now - dt1).Ticks;
+                        case AnalysisType.TSS: pInvs = CheckInvariantsTSS(w); break;
+                        case AnalysisType.Alaivan: pInvs = CheckInvariantsAlOpt(w); break;
+                        case AnalysisType.Farkas: pInvs = CheckInvariantsFar(w); break;
                     }
-                    MessageBox.Show((sum * 1.0 / tries / TimeSpan.TicksPerMillisecond) + "");
+                    sum += (DateTime.Now - dt1).Ticks;
                 }
-                else if (at == AnalysisType.Alaivan)
-                {
-                    long sum = 0;
-                    for (int i = 0; i < tries; i++)
-                    {
-                        DateTime dt1 = DateTime.Now;
-                        pInvs = CheckInvariantsAlOpt(w);
-                        sum += (DateTime.Now - dt1).Ticks;
-                 }
-                 MessageBox.Show((sum * 1.0 / tries / TimeSpan.TicksPerMillisecond) + "");
-                }
-                else
-                {
-                    long sum = 0;
-                    for (int i = 0; i < tries; i++)
-                    {
-                        DateTime dt1 = DateTime.Now;
-                        pInvs = CheckInveriantsFar(w);
-                        sum += (DateTime.Now - dt1).Ticks;
-                    }
-                    MessageBox.Show((sum * 1.0 / tries / TimeSpan.TicksPerMillisecond) + "");
-                }
+                string pInvsTime = (sum * 1.0 / tries / TimeSpan.TicksPerMillisecond) + "";
                 if (pInvs.Length == 0)
                 {
                     pInvs = new int[1, pInvs.GetLength(1)];
@@ -291,7 +250,9 @@ namespace CourseWork
                 {
                     infoForView[5] = true;
                 }
-                view.ShowResults(infoForView, rank, tInvs, pInvs, notCoveredIndsT, notCoveredIndsP);
+                if (getTime)
+                    view.ShowResults(infoForView, rank, tInvs, pInvs, notCoveredIndsT, notCoveredIndsP, tInvsTime, pInvsTime);
+                else view.ShowResults(infoForView, rank, tInvs, pInvs, notCoveredIndsT, notCoveredIndsP);
             }
         }
 
@@ -316,7 +277,7 @@ namespace CourseWork
             return solutions;
         }
 
-        private int[,] CheckInveriantsFar(int[,] wInv)
+        private int[,] CheckInvariantsFar(int[,] wInv)
         {
             //inverting a matrix
             int[,] w = new int[wInv.GetLength(1), wInv.GetLength(0)];
@@ -599,6 +560,7 @@ namespace CourseWork
                                 B.Add(newColumn);
                             }
                         }
+                        //support calculation
                         for (int chk = 0; chk < B.Count; chk++)
                         {
                             bool hasMinSupp = true;
@@ -639,7 +601,6 @@ namespace CourseWork
                     }
                 }
             }
-            //support calculation
             
             //converting
             int[,] solutions = new int[B.Count, bRowCount];
@@ -764,6 +725,7 @@ namespace CourseWork
                     }
                 }
             }
+            
             int[,] solutions = new int[e.Count, varCount];
             for (int i = 0; i < e.Count; i++)
             {
@@ -793,21 +755,6 @@ namespace CourseWork
                     return 1;
             }
             return result;
-        }
-
-        private int GCDExtended(int a, int b, ref int x, ref int y)
-        {
-            if (a == 0)
-            {
-                x = 0;
-                y = 1;
-                return b;
-            }
-            int x1 = 1, y1 = 1;
-            int gcd = GCDExtended(b % a, a, ref x1, ref y1);
-            x = y1 - (b / a) * x1;
-            y = x1;
-            return gcd;
         }
     }
 }
