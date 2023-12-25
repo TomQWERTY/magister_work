@@ -22,6 +22,7 @@ namespace CourseWork
         List<string> connections;
         WeightEnterForm wef;
         AnalyzeForm analyzeForm;
+        List<ViewConnection> conns2;
 
         public ViewForm(Controller con)
         {
@@ -51,6 +52,7 @@ namespace CourseWork
             firstSelected = null;
             horizontal = new List<int>();
             connections = new List<string>();
+            conns2 = new List<ViewConnection>();
             for (int i = dgv1.ColumnCount - 1; i >= 0; i--) dgv1.Columns.RemoveAt(i);
             dgv1.Columns.Add("", "");
             dgv1.Columns[dgv1.Columns.Count - 1].Width = 50;
@@ -105,6 +107,7 @@ namespace CourseWork
                                 {
                                     AddTransitionElement(t, false);
                                 }
+                                pictureBox1.Refresh();
                             }
                         }
                         break;
@@ -205,14 +208,24 @@ namespace CourseWork
 
         private void DrawConnection(Point p1, Point p2, int weigth)
         {
-            gr.DrawLine(lPen, p1, new Point(p2.X, p2.Y));
+            DrawConnCore(p1, p2, weigth);
+            pictureBox1.Refresh();
+        }
+
+        private void DrawConnNoRefr(Point p1, Point p2, int weigth)
+        {
+            DrawConnCore(p1, p2, weigth);
+        }
+
+        private void DrawConnCore(Point p1, Point p2, int weigth)
+        {
+            gr.DrawLine(lPen, p1, p2);
             if (weigth > 1)
             {
                 gr.DrawString(weigth + "", new Font("Arial", 12), Brushes.Black,
                 new Point(Math.Min(p1.X, p2.X) + Math.Abs(p1.X - p2.X) / 2,
                 Math.Min(p1.Y, p2.Y) + Math.Abs(p1.Y - p2.Y) / 2 + 10));
             }
-            pictureBox1.Refresh();
         }
 
         private void AddPlaceElement(Point p)
@@ -228,7 +241,6 @@ namespace CourseWork
                 dgv1[i, dgv1.Rows.Count - 1].Value = 0;
             }
             WriteElementName(true, places.Count - 1);
-            pictureBox1.Refresh();
         }
 
         private void AddTransitionElement(Point t, bool hor)
@@ -251,7 +263,6 @@ namespace CourseWork
             }
             controller.AddTransitionElement();
             WriteElementName(false, transitions.Count - 1);
-            pictureBox1.Refresh();
         }
 
         public void AddIndex(int rN, int cN, int val)
@@ -288,7 +299,7 @@ namespace CourseWork
             }
         }
 
-        public void ModifyTokens(int ind, int num)
+        public void ModifyTokens(int ind, int num, bool refr)
         {
             int clearRad = vRad * 3 / 4;
             Point p = new Point(places[ind].Value.X - clearRad, places[ind].Value.Y - clearRad);
@@ -303,7 +314,7 @@ namespace CourseWork
                 gr.DrawString(num + "", new Font("Arial", 12), Brushes.Black, places[ind].Value.X - 6,
                                             places[ind].Value.Y - 12);
             }
-            pictureBox1.Refresh();
+            if (refr) pictureBox1.Refresh();
         }
 
         private void radioButton4_CheckedChanged(object sender, EventArgs e)
@@ -427,10 +438,14 @@ namespace CourseWork
                     string[] connData = connections[i].Split(' ');
                     string[] p1Data = connData[0].Split(";");
                     string[] p2Data = connData[1].Split(";");
-                    DrawConnection(new Point(Convert.ToInt32(p1Data[0]), Convert.ToInt32(p1Data[1])),
+                    /*ViewConnection vc = new ViewConnection(new Point(Convert.ToInt32(p1Data[0]), Convert.ToInt32(p1Data[1])),
+                        new Point(Convert.ToInt32(p2Data[0]), Convert.ToInt32(p2Data[1])), Convert.ToInt32(connData[2]));
+                    conns2.Add(vc);*/
+                    DrawConnNoRefr(new Point(Convert.ToInt32(p1Data[0]), Convert.ToInt32(p1Data[1])),
                         new Point(Convert.ToInt32(p2Data[0]), Convert.ToInt32(p2Data[1])), Convert.ToInt32(connData[2]));
                 }
                 controller.UpdateView();
+                pictureBox1.Refresh();
             }
         }
 
@@ -438,6 +453,46 @@ namespace CourseWork
         {
             controller.Analyze(!(comboBox1.SelectedIndex == 0),
                 comboBox1.SelectedIndex == 0 ? 1 : Convert.ToInt32(comboBox1.SelectedItem));
+        }
+
+        private void Repaint()
+        {
+            pictureBox1.Image = new Bitmap(pictureBox1.Width, pictureBox1.Height);
+            gr = Graphics.FromImage(pictureBox1.Image);
+            for (int i = 0; i < places.Count; i++)
+            {
+                Point p = new Point(places[i].Value.X - vRad, places[i].Value.Y - vRad);
+                gr.DrawEllipse(pPen, new Rectangle(p, new Size(vRad * 2, vRad * 2)));
+                controller.AddPlaceElement();//kost
+                WriteElementName(true, i);
+            }
+            for (int i = 0, j = 0; i < transitions.Count; i++)
+            {
+                if (j < horizontal.Count && i == horizontal[j])
+                {
+
+                    gr.DrawLine(tPen, new Point(transitions[i].Value.X + vRad, transitions[i].Value.Y),
+                        new Point(transitions[i].Value.X - vRad, transitions[i].Value.Y));
+                    j++;
+                }
+                else
+                {
+                    gr.DrawLine(tPen, new Point(transitions[i].Value.X, transitions[i].Value.Y + vRad),
+                        new Point(transitions[i].Value.X, transitions[i].Value.Y - vRad));
+
+                }
+                WriteElementName(false, i);
+            }
+            for (int i = 0; i < connections.Count; i++)
+            {
+                string[] connData = connections[i].Split(' ');
+                string[] p1Data = connData[0].Split(";");
+                string[] p2Data = connData[1].Split(";");
+                DrawConnNoRefr(new Point(Convert.ToInt32(p1Data[0]), Convert.ToInt32(p1Data[1])),
+                    new Point(Convert.ToInt32(p2Data[0]), Convert.ToInt32(p2Data[1])), Convert.ToInt32(connData[2]));
+            }
+            controller.UpdateView();
+            pictureBox1.Refresh();
         }
 
         public void ShowResults(bool[] results, int rank, int[,] tInv, int[,] pInv, List<int> notCoveredIndsT,

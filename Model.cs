@@ -85,7 +85,7 @@ namespace CourseWork
         public void AddTokens(int ind, int num)
         {
             marking[ind] = num;
-            view.ModifyTokens(ind, num);
+            view.ModifyTokens(ind, num, true);
         }
 
         public void Save(string fileName, ViewSaveData viewSaveData)
@@ -114,7 +114,7 @@ namespace CourseWork
             }
             for (int i = 0; i < marking.Count; i++)
             {
-                view.ModifyTokens(i, marking[i]);
+                view.ModifyTokens(i, marking[i], false);
             }
             initialCount = matrixW.Count / 2;
             for (int i = matrixW.Count - 1; i >= initialCount; i--)

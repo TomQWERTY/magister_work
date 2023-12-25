@@ -115,7 +115,7 @@ namespace CourseWork
             {
                 int newVal = model.marking[i] + model.matrixW[i][ind];
                 model.marking[i] = newVal;
-                view.ModifyTokens(i, newVal);
+                view.ModifyTokens(i, newVal, true);
             }
         }
 
